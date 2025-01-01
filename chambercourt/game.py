@@ -380,7 +380,14 @@ class Game:
             self.screen.reinit_screen()
             self.screen.surface.blit(
                 self.screen.scale_surface(title_image),
-                (110 * self.screen.window_scale, 20 * self.screen.window_scale),
+                (
+                    (
+                        self.screen_size()[0]
+                        - title_image.get_width() * self.screen.window_scale
+                    )
+                    // 2,
+                    20 * self.screen.window_scale,
+                ),
             )
             self.screen.print_screen((0, 14), instructions, color="grey")
             self.screen.print_screen(
