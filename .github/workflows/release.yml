@@ -61,13 +61,13 @@ jobs:
       - name: Build the executable (Ubuntu)
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
+          pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --copy-metadata chambercourt --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }} --help
       - name: Build the executable (macOS)
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
         run: |
           ./make-macos-icns ./chambercourt/levels/Hero.png chambercourt.iconset
-          pyi-makespec --windowed --name chambercourt --icon chambercourt.icns --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
+          pyi-makespec --windowed --name chambercourt --icon chambercourt.icns --copy-metadata chambercourt --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           export version=$(grep version pyproject.toml)
           sed -i '' -e "s/\(name='chambercourt.app'\)/\1,\n    $version/" chambercourt.spec
           pyinstaller --noconfirm chambercourt.spec
