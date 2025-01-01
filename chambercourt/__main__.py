@@ -6,5 +6,5 @@ import sys
 
 from chambercourt import main
 
-sys.argv[0] = re.sub(r"__main__.py$", __package__, sys.argv[0])
+sys.argv[0] = re.sub(r"__main__.py$", "chambercourt", sys.argv[0])
 main()

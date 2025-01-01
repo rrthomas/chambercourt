@@ -41,8 +41,8 @@ with warnings.catch_warnings():
 
 locale.setlocale(locale.LC_ALL, "")
 
-metadata = importlib.metadata.metadata(__package__)
-VERSION = importlib.metadata.version(__package__)
+metadata = importlib.metadata.metadata("chambercourt")
+VERSION = importlib.metadata.version("chambercourt")
 
 # Try to set LANG for gettext if not already set
 if not "LANG" in os.environ:
@@ -67,7 +67,7 @@ with warnings.catch_warnings():
     from pygame import Vector2
 
 
-DATA_DIR = Path(user_data_dir(__package__))
+DATA_DIR = Path(user_data_dir("chambercourt"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 SAVED_POSITION_FILE = DATA_DIR / "saved_position.pkl"
 
@@ -533,7 +533,7 @@ def app_main(
 
     with importlib_resources.as_file(importlib_resources.files()) as path:
         # Internationalise all modules that need it.
-        cat = gettext.translation(__package__, path / "locale", fallback=True)
+        cat = gettext.translation("chambercourt", path / "locale", fallback=True)
         _ = cat.gettext
         app_game_module._ = cat.gettext  # type: ignore[attr-defined]
 
