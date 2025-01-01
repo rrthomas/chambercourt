@@ -67,7 +67,7 @@ jobs:
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
         run: |
           ./make-macos-icns ./chambercourt/levels/Hero.png chambercourt.iconset
-          pyi-makespec --windowed --name chambercourt --icon chambercourt.icns --copy-metadata chambercourt --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
+          pyi-makespec --windowed --name ChamberCourt --icon chambercourt.icns --copy-metadata chambercourt --add-data "chambercourt/*.png:chambercourt/" --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           export version=$(grep version pyproject.toml)
           sed -i '' -e "s/\(name='chambercourt.app'\)/\1,\n    $version/" chambercourt.spec
           PYTHONPATH=. pyinstaller --noconfirm chambercourt.spec
