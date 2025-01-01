@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-01 15:33+0000\n"
+"POT-Creation-Date: 2025-01-01 16:33+0000\n"
 "PO-Revision-Date: 2024-12-16 20:03+0000\n"
 "Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
 "Language: Greek\n"
@@ -22,19 +22,19 @@ msgstr ""
 msgid "Could not find any levels"
 msgstr ""
 
-#: chambercourt/game.py:388
+#: chambercourt/game.py:395
 msgid "Start level: {}/{}"
 msgstr "Επίπεδο αρχής: {}/{}"
 
-#: chambercourt/game.py:494
+#: chambercourt/game.py:501
 msgid "Level {}:"
 msgstr "Επίπεδο {}:"
 
-#: chambercourt/game.py:538
+#: chambercourt/game.py:545
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:544
+#: chambercourt/game.py:551
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr "%(prog)s {} από {}"
