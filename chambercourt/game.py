@@ -531,7 +531,7 @@ def app_main(
 ) -> None:
     global _
 
-    with importlib_resources.as_file(importlib_resources.files()) as path:
+    with importlib_resources.as_file(importlib_resources.files(app_game_module)) as path:
         # Internationalise all modules that need it.
         cat = gettext.translation("chambercourt", path / "locale", fallback=True)
         _ = cat.gettext
