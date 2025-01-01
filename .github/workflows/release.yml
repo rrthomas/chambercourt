@@ -94,14 +94,3 @@ jobs:
           tag: ${{ github.ref }}
           file: ./dist/wincoll*.msi
           file_glob: true
-      - name: Build the RISC OS distribution
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: ./dist-riscos
-      - name: Upload the RISC OS distribution
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ github.token }}
-          tag: ${{ github.ref }}
-          file: ./dist/wincoll-riscos.zip
-          file_glob: true
