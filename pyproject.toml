@@ -41,7 +41,7 @@ packages = [
 ]
 
 [tool.setuptools.package-data]
-chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo"]
+chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo", "py.typed"]
 
 [tool.mypy]
 exclude = ['^dist', '^build']
