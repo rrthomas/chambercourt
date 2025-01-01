@@ -1,5 +1,5 @@
 [project]
-name = "WinColl"
+name = "ChamberCourt"
 version = "0.9.10"
 description = "Simple rocks-and-diamonds game"
 license = {text = "GPL v3 or later"}
@@ -7,7 +7,7 @@ authors = [
     {name = "Reuben Thomas", email = "rrt@sc3d.org"}
 ]
 readme = "README.md"
-urls = {Homepage = "https://github.com/rrthomas/wincoll"}
+urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
 requires-python = ">= 3.11"
 dependencies = [
     "aenum",
@@ -22,12 +22,12 @@ classifiers = [
     "Environment :: X11 Applications",
     "Environment :: MacOS X",
     "Environment :: Win32 (MS Windows)",
-    "Topic :: Games/Entertainment :: Puzzle Games",
+    "Topic :: Games/Entertainment",
     "Programming Language :: Python :: 3",
 ]
 
 [project.scripts]
-wincoll = "wincoll:main"
+chambercourt = "chambercourt:main"
 
 [build-system]
 requires = [
@@ -37,24 +37,24 @@ requires = [
 
 [tool.setuptools]
 packages = [
-    "wincoll",
+    "chambercourt",
 ]
 
 [tool.setuptools.package-data]
-wincoll = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo"]
+chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo"]
 
 [tool.mypy]
 exclude = ['^dist', '^build']
 strict = true
 
 [[tool.mypy.overrides]]
-module = "wincoll.ptext"
+module = "chambercourt.ptext"
 ignore_errors = true
 
 [tool.pylint.main]
 # Use multiple processes to speed up Pylint: 0 = auto-detect.
 jobs = 0
-ignore-paths = ["wincoll/ptext.py"]
+ignore-paths = ["chambercourt/ptext.py"]
 
 [tool.pylint.MASTER]
 init-hook = 'import sys; sys.path.append(".")'
@@ -83,10 +83,10 @@ enable = [
 ]
 
 [[tool.cxfreeze.executables]]
-script = "wincoll/__main__.py"
+script = "chambercourt/__main__.py"
 base = "gui"
-icon = "win"
-shortcut_name = "WinColl"
+icon = "app-icon"
+shortcut_name = "ChamberCourt"
 shortcut_dir = "DesktopFolder"
 
 [tool.cxfreeze.build_exe]

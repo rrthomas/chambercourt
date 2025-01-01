@@ -1,18 +1,21 @@
-# French strings for ChamberCourt.
-# Copyright (C) 2024 Reuben Thomas
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-01 15:33+0000\n"
-"PO-Revision-Date: 2024-12-16 20:03+0000\n"
-"Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
-"Language: French\n"
+"POT-Creation-Date: 2025-01-01 15:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.5\n"
 
 #: chambercourt/game.py:168
 msgid "Error reading levels: {}"
@@ -24,17 +27,17 @@ msgstr ""
 
 #: chambercourt/game.py:388
 msgid "Start level: {}/{}"
-msgstr "Niveau à commencer: {}/{}"
+msgstr ""
 
 #: chambercourt/game.py:494
 msgid "Level {}:"
-msgstr "Niveau {}:"
+msgstr ""
 
 #: chambercourt/game.py:538
 msgid "a directory or Zip file of levels to use"
-msgstr "un répertoire ou fichier Zip de niveaux à utiliser"
+msgstr ""
 
 #: chambercourt/game.py:544
 #, python-format
 msgid "%(prog)s {} by {}"
-msgstr "%(prog)s {} de {}"
+msgstr ""

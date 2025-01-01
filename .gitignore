@@ -91,9 +91,7 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# WinColl-specific files
-Saved,ffd
+# chambercourt-specific files
 *.tiled-session
-wincoll.icns
-\!WinColl/??,ffd
-po/wincoll.pot
+chambercourt.icns
+po/chambercourt.pot

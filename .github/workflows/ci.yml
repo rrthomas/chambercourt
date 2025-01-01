@@ -28,6 +28,6 @@ jobs:
           fi
           tox
           make build
-          PYTHONPATH=. python -m wincoll --help
+          PYTHONPATH=. python -m chambercourt --help
           pip install .
-          wincoll --help
+          chambercourt --help

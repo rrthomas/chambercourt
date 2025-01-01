@@ -1,21 +1,21 @@
 # Makefile for maintainer tasks
 
-po/wincoll.pot: po/wincoll.pot.in
+po/chambercourt.pot: po/chambercourt.pot.in
 	sed -e s/VERSION/$$(grep version pyproject.toml | grep -o "[0-9.]\+")/ < $^ > $@
 
 update-pot:
-	$(MAKE) po/wincoll.pot
-	find wincoll -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=wincoll --output=po/wincoll.pot.in
+	$(MAKE) po/chambercourt.pot
+	find chambercourt -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=chambercourt --output=po/chambercourt.pot.in
 
 update-po:
-	for po in po/*.po; do msgmerge --update $$po po/wincoll.pot; done
+	for po in po/*.po; do msgmerge --update $$po po/chambercourt.pot; done
 
 compile-po:
-	for po in po/*.po; do mo=wincoll/locale/$$(basename $${po%.po})/LC_MESSAGES/wincoll.mo; mkdir -p $$(dirname $$mo); msgfmt --output-file=$$mo $$po; done
+	for po in po/*.po; do mo=chambercourt/locale/$$(basename $${po%.po})/LC_MESSAGES/chambercourt.mo; mkdir -p $$(dirname $$mo); msgfmt --output-file=$$mo $$po; done
 
 update-pofiles:
 	$(MAKE) update-pot
-	$(MAKE) po/wincoll.pot
+	$(MAKE) po/chambercourt.pot
 	$(MAKE) update-po
 	$(MAKE) compile-po
 
@@ -40,6 +40,6 @@ release:
 	git push --tags
 
 loc:
-	cloc --exclude-content="ptext module" wincoll/*.py
+	cloc --exclude-content="ptext module" chambercourt/*.py
 
 .PHONY: dist build

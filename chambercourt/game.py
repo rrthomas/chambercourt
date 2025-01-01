@@ -67,7 +67,7 @@ with warnings.catch_warnings():
     from pygame import Vector2
 
 
-DATA_DIR = Path(user_data_dir("wincoll"))
+DATA_DIR = Path(user_data_dir(__package__))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 SAVED_POSITION_FILE = DATA_DIR / "saved_position.pkl"
 
