@@ -527,15 +527,24 @@ class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
 
 
 def app_main(
-    argv: List[str], app_game_module: types.ModuleType, game_class: type[Game]
+    argv: List[str],
+    game_package_name: str,
+    app_game_module: types.ModuleType,
+    game_class: type[Game],
 ) -> None:
     global _
 
-    with importlib_resources.as_file(importlib_resources.files(app_game_module)) as path:
-        # Internationalise all modules that need it.
+    # Internationalise this module.
+    with importlib_resources.as_file(importlib_resources.files()) as path:
         cat = gettext.translation("chambercourt", path / "locale", fallback=True)
         _ = cat.gettext
-        app_game_module._ = cat.gettext  # type: ignore[attr-defined]
+
+    with importlib_resources.as_file(
+        importlib_resources.files(app_game_module)
+    ) as path:
+        # Internationalise the game module.
+        app_cat = gettext.translation(game_package_name, path / "locale", fallback=True)
+        app_game_module._ = app_cat.gettext  # type: ignore[attr-defined]
 
         # Command-line arguments
         parser = argparse.ArgumentParser(description=game_class.description())
