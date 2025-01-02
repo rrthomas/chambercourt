@@ -41,7 +41,6 @@ with warnings.catch_warnings():
 
 locale.setlocale(locale.LC_ALL, "")
 
-metadata = importlib.metadata.metadata("chambercourt")
 VERSION = importlib.metadata.version("chambercourt")
 
 # Try to set LANG for gettext if not already set
@@ -50,9 +49,6 @@ if not "LANG" in os.environ:
     if lang is not None:
         os.environ["LANG"] = lang
 i18nparse.activate()
-
-# Set app name for SDL
-os.environ["SDL_APP_NAME"] = metadata["Name"]
 
 # Placeholder for gettext
 _: Callable[[str], str] = lambda _: _
@@ -543,6 +539,11 @@ def app_main(
     with importlib_resources.as_file(importlib_resources.files()) as path:
         cat = gettext.translation("chambercourt", path / "locale", fallback=True)
         _ = cat.gettext
+
+    metadata = importlib.metadata.metadata(game_package_name)
+
+    # Set app name for SDL
+    os.environ["SDL_APP_NAME"] = metadata["Name"]
 
     with importlib_resources.as_file(
         importlib_resources.files(app_game_module)
