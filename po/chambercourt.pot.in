@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-02 17:33+0000\n"
+"POT-Creation-Date: 2025-01-02 18:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: chambercourt/game.py:168
+#: chambercourt/game.py:162
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:171
+#: chambercourt/game.py:165
 msgid "Could not find any levels"
 msgstr ""
 
-#: chambercourt/game.py:396
+#: chambercourt/game.py:390
 msgid "Start level: {}/{}"
 msgstr ""
 
-#: chambercourt/game.py:502
+#: chambercourt/game.py:500
 msgid "Level {}:"
 msgstr ""
 
-#: chambercourt/game.py:555
+#: chambercourt/game.py:559
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:561
+#: chambercourt/game.py:565
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr ""
