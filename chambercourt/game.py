@@ -426,6 +426,9 @@ class Game:
             clock.tick(FRAMES_PER_SECOND)
         return max(min(level, self.levels), 1)
 
+    def shutdown(self) -> None:
+        pass
+
     def run(self, level: int) -> None:
         self.quit = False
         self.level = level
@@ -475,6 +478,7 @@ class Game:
                 self.level += 1
         if self.level > self.levels:
             self.splurge(self.hero.image)
+        self.shutdown()
 
     def init_physics(self) -> None:
         for x in range(self.level_width):
