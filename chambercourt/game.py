@@ -41,8 +41,6 @@ with warnings.catch_warnings():
 
 locale.setlocale(locale.LC_ALL, "")
 
-VERSION = importlib.metadata.version("chambercourt")
-
 # Try to set LANG for gettext if not already set
 if not "LANG" in os.environ:
     lang = language_code()
@@ -541,6 +539,7 @@ def app_main(
         _ = cat.gettext
 
     metadata = importlib.metadata.metadata(game_package_name)
+    version = importlib.metadata.version(game_package_name)
 
     # Set app name for SDL
     os.environ["SDL_APP_NAME"] = metadata["Name"]
@@ -563,7 +562,7 @@ def app_main(
             "-V",
             "--version",
             action="version",
-            version=_("%(prog)s {} by {}").format(VERSION, metadata["Author-email"]),
+            version=_("%(prog)s {} by {}").format(version, metadata["Author-email"]),
         )
         warnings.showwarning = simple_warning(parser.prog)
         args = parser.parse_args(argv)
