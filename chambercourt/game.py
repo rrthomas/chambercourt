@@ -268,6 +268,7 @@ class Game:
         self.set(self.hero.position, Tile.HERO)
         with open(SAVED_POSITION_FILE, "wb") as fh:
             pickle.dump(self._map_blocks, fh)
+        self.set(self.hero.position, Tile.EMPTY)
 
     def load_position(self) -> None:
         if SAVED_POSITION_FILE.exists():
