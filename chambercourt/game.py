@@ -72,7 +72,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 SAVED_POSITION_FILE = DATA_DIR / "saved_position.pkl"
 
 
-FRAMES_PER_SECOND = 50
+FRAMES_PER_SECOND = 30
 SUBFRAMES = 4
 
 
