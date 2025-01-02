@@ -1,6 +1,6 @@
 [project]
 name = "ChamberCourt"
-version = "0.9.4"
+version = "0.9.5"
 description = "Simple 2D grid game framework based on PyGame"
 license = {text = "GPL v3 or later"}
 authors = [
