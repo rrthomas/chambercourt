@@ -65,7 +65,6 @@ const-naming-style = "any"
 disable = [
     "no-member",
     "fixme",
-    "global-statement",
     "too-many-arguments",
     "too-many-branches",
     "too-many-instance-attributes",

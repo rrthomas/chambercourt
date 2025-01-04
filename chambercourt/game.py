@@ -706,7 +706,8 @@ def app_main(
     :param game_class: the game class, a subclass of `Game`
     :type game_class: type[Game]
     """
-    global _
+
+    global _  # pylint: disable=global-statement
 
     # Internationalise this module.
     with importlib_resources.as_file(importlib_resources.files()) as path:
