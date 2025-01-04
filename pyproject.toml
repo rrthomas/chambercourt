@@ -55,6 +55,7 @@ ignore_errors = true
 # Use multiple processes to speed up Pylint: 0 = auto-detect.
 jobs = 0
 ignore-paths = ["chambercourt/ptext.py"]
+extension-pkg-whitelist = ["pygame"]
 
 [tool.pylint.MASTER]
 init-hook = 'import sys; sys.path.append(".")'
@@ -63,7 +64,6 @@ init-import = "yes"
 [tool.pylint.format]
 const-naming-style = "any"
 disable = [
-    "no-member",
     "fixme",
     "too-many-arguments",
     "too-many-branches",
