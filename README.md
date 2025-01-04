@@ -8,14 +8,12 @@ ChamberCourt is a framework for simple 2-D grid-based games, based on
 [PyGame](https://pygame.org).
 
 It is only intended for use by the author, mostly to resurrect a bunch of
-old games he wrote a long time ago. As such, there is no documentation other
-than the code. However, if anyone would like to help make it usable by
-others, I would be delighted to hear from them. I would prefer to keep it as
-simple as possible; however there is room for improvement in many areas. For
-example, it would be nice if the games could run on the web (I have
-experimented with [pygbag](https://github.com/pygame-web/pygbag/), but I
-didn’t get very far yet), and some basic functionality would be nice such as
-a UI for rebinding keys.
+old games he wrote a long time ago. I welcome help to make it more generally
+useful: there is room for improvement in many areas. For example, it would
+be nice if the games could run on the web (I have experimented with
+[pygbag](https://github.com/pygame-web/pygbag/), but I didn’t get very far
+yet), and some basic functionality would be nice such as a UI for rebinding
+keys. However, I want to keep it as simple as possible!
 
 The package is named after the central courtyard of my school, Winchester
 College, because I wrote this package first while resurrecting a game,
@@ -23,6 +21,8 @@ College, because I wrote this package first while resurrecting a game,
 
 
 ## Installation and use
+
+* [API documentation](https://rrthomas.github.io/chambercourt)
  
 Install with `pip`: `pip install chambercourt`.
 

@@ -11,6 +11,15 @@ from typing import Callable, Optional, Union, Type, NoReturn, TextIO
 
 # Error messages
 def simple_warning(prog: str) -> Callable[..., None]:
+    """
+    Make a simply-formatted `warnings.warn` routine to give console warnings
+    for a program invoked from the terminal.
+
+    :param prog: the program's name
+    :type prog: str
+    :return: the warning function
+    :rtype: Callable[..., None]
+    """
     def _warning(  # pylint: disable=too-many-arguments
         message: Union[Warning, str],
         category: Type[Warning],  # pylint: disable=unused-argument
@@ -25,5 +34,15 @@ def simple_warning(prog: str) -> Callable[..., None]:
 
 
 def die(msg: str, code: Optional[int] = 1) -> NoReturn:
+    """
+    Print a fatal error message and exit.
+
+    :param msg: the error message
+    :type msg: str
+    :param code: exit code, defaults to 1
+    :type code: Optional[int], optional
+    :return: this function does not return
+    :rtype: NoReturn
+    """
     warn(msg)
     sys.exit(code)

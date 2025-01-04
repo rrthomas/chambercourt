@@ -63,9 +63,6 @@ init-import = "yes"
 [tool.pylint.format]
 const-naming-style = "any"
 disable = [
-    "missing-module-docstring",
-    "missing-class-docstring",
-    "missing-function-docstring",
     "no-member",
     "fixme",
     "global-statement",

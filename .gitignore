@@ -95,3 +95,4 @@ ENV/
 *.tiled-session
 chambercourt.icns
 po/chambercourt.pot
+docs/
