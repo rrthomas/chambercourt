@@ -305,7 +305,7 @@ class Game:
             return Tile.BRICK
         block = self._map_blocks[y][x]
         if block == 0:  # Missing tiles are gaps
-            block = Tile.EMPTY
+            return Tile.EMPTY
         return Tile(self.map_data.tmx.get_tile_properties(x, y, 0)["type"])
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
