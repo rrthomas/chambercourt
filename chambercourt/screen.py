@@ -85,7 +85,7 @@ class Screen:
         next frame.
         """
         pygame.display.flip()
-        self.surface.fill(self.background_colour)
+        self.reinit_screen()
         self.fade_background()
 
     def text_to_screen(self, pos: Tuple[int, int]) -> Tuple[int, int]:
