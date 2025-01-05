@@ -32,17 +32,19 @@ class Screen:
         Args:
             screen_size (tuple[int, int]): a `(width, height)` pair giving
               the screen size in pixels
-            
+
             fontname (str): the monospaced font to use for text
-            
+
             window_scale (int, optional): the scale factor by which the game
               window is scaled to blit it to the screen. Defaults to 1.
-        """        
+        """
         self.window_scale = window_scale
         self.text_colour = (255, 255, 255)
         self.background_colour = (0, 0, 255)
         self.font_pixels = 8 * self.window_scale
-        self.surface = pygame.display.set_mode(screen_size, pygame.SCALED)
+        self.surface = pygame.display.set_mode(
+            screen_size, pygame.SCALED | pygame.DOUBLEBUF, vsync=1
+        )
         self.reinit_screen()
         self.fontname = fontname
         # Force ptext to cache the font
