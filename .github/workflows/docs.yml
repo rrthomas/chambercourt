@@ -1,4 +1,4 @@
-name: website
+name: Website
 
 # build the documentation for each new tag
 on:
