@@ -20,9 +20,6 @@ jobs:
         run: pip install tox build setuptools pygame i18nparse platformdirs pyscroll pytmx
       - name: Build
         run: |
-          if [ "$RUNNER_OS" != "macOS" ]; then
-            pip install tox
-          fi
           tox
           make build
           PYTHONPATH=. python -m chambercourt --help
