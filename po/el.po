@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-05 15:56+0000\n"
+"POT-Creation-Date: 2025-01-05 16:58+0000\n"
 "PO-Revision-Date: 2024-12-16 20:03+0000\n"
 "Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
 "Language: Greek\n"
@@ -14,27 +14,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: chambercourt/game.py:483
+#: chambercourt/game.py:178
+msgid "Play a game."
+msgstr ""
+
+#: chambercourt/game.py:189
+msgid "Game instructions go here."
+msgstr ""
+
+#: chambercourt/game.py:238
+msgid "map tiles must be square"
+msgstr ""
+
+#: chambercourt/game.py:473
 msgid "Start level: {}/{}"
 msgstr "Επίπεδο αρχής: {}/{}"
 
-#: chambercourt/game.py:620
+#: chambercourt/game.py:610
 msgid "Level {}:"
 msgstr "Επίπεδο {}:"
 
-#: chambercourt/game.py:665
+#: chambercourt/game.py:655
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:671
+#: chambercourt/game.py:661
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr "%(prog)s {} από {}"
 
-#: chambercourt/game.py:700
+#: chambercourt/game.py:690
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:703
+#: chambercourt/game.py:693
 msgid "Could not find any levels"
 msgstr ""
