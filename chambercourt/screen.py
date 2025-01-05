@@ -30,6 +30,7 @@ class Screen:
         fontname: str,
         window_scale: int = 1,
         font_scale: int = 1,
+        background_colour: tuple[int, int, int] = (0, 0, 255),
     ) -> None:
         """Create a `Screen` object.
 
@@ -45,10 +46,14 @@ class Screen:
             font_scale (int, optional): the scale factor by which the font
               is enlarged. Defaults to 1. The font is additionally scaled by
               `window_scale`.
+
+            background_colour (tuple[int, int, int], optional): the
+              background colour of the screen. Defaults to `(0, 0, 255)`.
         """
         self.window_scale = window_scale
         self.text_colour = (255, 255, 255)
-        self.background_colour = (0, 0, 255)
+        self.background_colour = background_colour
+        self.default_background_colour = background_colour
         self.font_pixels = 8 * self.window_scale * font_scale
         self.surface = pygame.display.set_mode(screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
@@ -70,7 +75,11 @@ class Screen:
         screen to flash, indicating that some action such as saving the
         player’s position has been accomplished.
         """
-        self.background_colour = (160, 160, 255)
+        self.background_colour = (
+            min(255, self.default_background_colour[0] + 160),
+            min(255, self.default_background_colour[1] + 160),
+            min(255, self.default_background_colour[2] + 160),
+        )
 
     def fade_background(self) -> None:
         """Fade the background.
@@ -79,9 +88,9 @@ class Screen:
         over a period of several frames.
         """
         self.background_colour = (
-            max(self.background_colour[0] - 10, 0),
-            max(self.background_colour[0] - 10, 0),
-            255,
+            max(self.background_colour[0] - 10, self.default_background_colour[0]),
+            max(self.background_colour[1] - 10, self.default_background_colour[1]),
+            max(self.background_colour[2] - 10, self.default_background_colour[2]),
         )
 
     def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
