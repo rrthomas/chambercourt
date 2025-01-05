@@ -175,7 +175,7 @@ class Game[Tile: StrEnum]:
         Returns:
             str: description of the game
         """
-        return "Play a game."
+        return _("Play a game.")
 
     @staticmethod
     def instructions() -> str:
@@ -186,29 +186,20 @@ class Game[Tile: StrEnum]:
             width of the screen, and contain three consecutive newlines to
             indicate the position of the level selector.
         """
-        return "Game instructions go here."
+        return _("Game instructions go here.")
 
-    @staticmethod
-    def screen_size() -> tuple[int, int]:
-        """Returns the size of the game screen.
+    screen_size = (1024, 768)
+    """The size of the game screen.
 
-        Returns:
-            tuple[int, int]: A pair giving the `(height, width)` of the
-              screen
-        """
-        return (1024, 768)
+    A pair giving the `(height, width)` of the screen.
+    """
 
-    @staticmethod
-    def window_size() -> tuple[int, int]:
-        """Returns the size of the game window.
+    window_size = (640, 480)
+    """The size of the game window.
 
-        This is the area in which the game world is shown.
-
-        Returns:
-            tuple[int, int]: A pair giving the `(height, width)` of the
-              window.
-        """
-        return (640, 480)
+    A pair giving the `(height, width)` of the window. This is the area in
+    which the game world is shown.
+    """
 
     def load_assets(self, path: Path, levels_path: Path) -> None:
         """Load game assets from the levels directory.
@@ -242,10 +233,9 @@ class Game[Tile: StrEnum]:
         tmx_data = pytmx.load_pygame(self.levels_files[self.level - 1])
         self.map_data = pyscroll.data.TiledMapData(tmx_data)
         self._map_blocks = self.map_data.tmx.layers[0].data
-        # FIXME: The level dimensions should be per-level, not class properties.
         (self.level_width, self.level_height) = self.map_data.map_size
-        # FIXME: Report error if tiles are not square
-        assert self.map_data.tile_size[0] == self.map_data.tile_size[1]
+        if self.map_data.tile_size[0] != self.map_data.tile_size[1]:
+            raise Exception(_("map tiles must be square"))
         self.block_pixels = self.map_data.tile_size[0]
         self.window_pixel_width = min(
             self.level_width * self.block_pixels,
@@ -304,7 +294,7 @@ class Game[Tile: StrEnum]:
     def _set(self, pos: Vector2, tile: Tile) -> None:
         self._map_blocks[int(pos.y)][int(pos.x)] = self._gids[tile]
         # Update rendered map
-        # FIXME: We invoke protected methods and access protected members.
+        # NOTE: We invoke protected methods and access protected members.
         ml = self._map_layer
         rect = (int(pos.x), int(pos.y), 1, 1)
         ml._tile_queue = chain(ml._tile_queue, ml.data.get_tile_images_by_rect(rect))
@@ -416,7 +406,7 @@ class Game[Tile: StrEnum]:
         self.die_sound.play()
         self.game_surface.blit(
             self.die_image,
-            self.game_to_screen(int(self.hero.position.x), int(self.hero.position.y)),
+            self.game_to_screen((int(self.hero.position.x), int(self.hero.position.y))),
         )
         self.show_status()
         self.screen.surface.blit(
@@ -426,26 +416,26 @@ class Game[Tile: StrEnum]:
         pygame.time.wait(1000)
         self.dead = False
 
-    def game_to_screen(self, x: int, y: int) -> tuple[int, int]:
+    def game_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
         """Convert game grid to screen coordinates.
 
-        FIXME: the arguments should be a tuple.
-
         Args:
-            x (int): grid x coordinate
-            y (int): grid y coordinate
+            pos (tuple[int, int]): grid coordinates
 
         Returns:
             tuple[int, int]: the corresponding screen coordinates
         """
         origin = self._map_layer.get_center_offset()
-        return (origin[0] + x * self.block_pixels, origin[1] + y * self.block_pixels)
+        return (
+            origin[0] + pos[0] * self.block_pixels,
+            origin[1] + pos[1] * self.block_pixels,
+        )
 
     def splurge(self, sprite: pygame.Surface) -> None:
         """Fill the game area with one sprite."""
         for x in range(self.level_width):
             for y in range(self.level_height):
-                self.game_surface.blit(sprite, self.game_to_screen(x, y))
+                self.game_surface.blit(sprite, self.game_to_screen((x, y)))
         self.screen.surface.blit(
             self.screen.scale_surface(self.game_surface), self.window_pos
         )
@@ -470,7 +460,7 @@ class Game[Tile: StrEnum]:
                 self.screen.scale_surface(title_image),
                 (
                     (
-                        self.screen_size()[0]
+                        self.screen_size[0]
                         - title_image.get_width() * self.screen.window_scale
                     )
                     // 2,
@@ -710,7 +700,7 @@ class Game[Tile: StrEnum]:
             pygame.key.set_repeat()
             pygame.joystick.init()
             pygame.display.set_caption(metadata["Name"])
-            self.screen = Screen(self.screen_size(), str(path / "acorn-mode-1.ttf"), 2)
+            self.screen = Screen(self.screen_size, str(path / "acorn-mode-1.ttf"), 2)
             die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
             die_sound.set_volume(DEFAULT_VOLUME)
 
