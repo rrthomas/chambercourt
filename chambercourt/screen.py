@@ -42,9 +42,7 @@ class Screen:
         self.text_colour = (255, 255, 255)
         self.background_colour = (0, 0, 255)
         self.font_pixels = 8 * self.window_scale
-        self.surface = pygame.display.set_mode(
-            screen_size, pygame.SCALED | pygame.DOUBLEBUF, vsync=1
-        )
+        self.surface = pygame.display.set_mode(screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
         self.fontname = fontname
         # Force ptext to cache the font
