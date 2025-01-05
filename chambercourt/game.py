@@ -204,6 +204,12 @@ class Game[Tile: StrEnum]:
     The window is scaled by this factor before being blitted to the screen.
     """
 
+    font_scale = 1
+    """The scale factor applied to the font.
+
+    The font is scaled by `window_scale` and then by this factor.
+    """
+
     def load_assets(self, path: Path, levels_path: Path) -> None:
         """Load game assets from the levels directory.
 
@@ -711,7 +717,7 @@ class Game[Tile: StrEnum]:
             pygame.key.set_repeat()
             pygame.joystick.init()
             pygame.display.set_caption(metadata["Name"])
-            self.screen = Screen(self.screen_size, str(path / "acorn-mode-1.ttf"), self.window_scale)
+            self.screen = Screen(self.screen_size, str(path / "acorn-mode-1.ttf"), self.window_scale, self.font_scale)
             self.die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
             self.die_sound.set_volume(DEFAULT_VOLUME)
 

@@ -25,7 +25,11 @@ class Screen:
     """
 
     def __init__(
-        self, screen_size: tuple[int, int], fontname: str, window_scale: int = 1
+        self,
+        screen_size: tuple[int, int],
+        fontname: str,
+        window_scale: int = 1,
+        font_scale: int = 1,
     ) -> None:
         """Create a `Screen` object.
 
@@ -37,11 +41,15 @@ class Screen:
 
             window_scale (int, optional): the scale factor by which the game
               window is scaled to blit it to the screen. Defaults to 1.
+
+            font_scale (int, optional): the scale factor by which the font
+              is enlarged. Defaults to 1. The font is additionally scaled by
+              `window_scale`.
         """
         self.window_scale = window_scale
         self.text_colour = (255, 255, 255)
         self.background_colour = (0, 0, 255)
-        self.font_pixels = 8 * self.window_scale
+        self.font_pixels = 8 * self.window_scale * font_scale
         self.surface = pygame.display.set_mode(screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
         self.fontname = fontname
