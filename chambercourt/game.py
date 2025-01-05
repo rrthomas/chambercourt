@@ -9,6 +9,7 @@ import atexit
 import gettext
 import importlib
 import importlib.metadata
+import importlib.resources
 import locale
 import os
 import pickle
@@ -21,7 +22,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import i18nparse  # type: ignore
-import importlib_resources
 from platformdirs import user_data_dir
 
 from .event import handle_global_keys, handle_quit_event, quit_game
@@ -290,7 +290,7 @@ class Game[Tile: StrEnum]:
 
         Returns:
             Tile: the `Tile` at the given position
-        """        # Anything outside the map is a default tile
+        """  # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
             return self.default_tile
@@ -644,7 +644,7 @@ class Game[Tile: StrEnum]:
         global _
 
         # Internationalise this module.
-        with importlib_resources.as_file(importlib_resources.files()) as path:
+        with importlib.resources.as_file(importlib.resources.files()) as path:
             cat = gettext.translation("chambercourt", path / "locale", fallback=True)
             _ = cat.gettext
 
@@ -654,8 +654,8 @@ class Game[Tile: StrEnum]:
         # Set app name for SDL
         os.environ["SDL_APP_NAME"] = metadata["Name"]
 
-        with importlib_resources.as_file(
-            importlib_resources.files(self.game_package_name)
+        with importlib.resources.as_file(
+            importlib.resources.files(self.game_package_name)
         ) as path:
             # Command-line arguments
             parser = argparse.ArgumentParser(description=self.description())
@@ -734,7 +734,7 @@ class Hero(pygame.sprite.Sprite):
 
     def __init__(self, image: pygame.Surface) -> None:
         """Create a Hero object.
-        
+
         Args:
             image (pygame.Surface): the hero image
         """

@@ -11,7 +11,6 @@ urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
 requires-python = ">= 3.12"
 dependencies = [
     "i18nparse",
-    "importlib-resources >= 5.10",
     "platformdirs",
     "pygame >= 2.0.0",
     "pyscroll",
