@@ -13,7 +13,7 @@ from warnings import warn
 # Error messages
 def simple_warning(prog: str) -> Callable[..., None]:
     """Make a simply-formatted `warnings.warn` routine.
-    
+
     This is suitable for console warnings for a program invoked from the
     terminal.
 
@@ -23,6 +23,7 @@ def simple_warning(prog: str) -> Callable[..., None]:
     Returns:
         Callable[..., None]: the warning function
     """
+
     def _warning(
         message: Warning | str,
         category: type[Warning],
