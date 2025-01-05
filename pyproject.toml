@@ -8,7 +8,7 @@ authors = [
 ]
 readme = "README.md"
 urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
-requires-python = ">= 3.11"
+requires-python = ">= 3.12"
 dependencies = [
     "i18nparse",
     "importlib-resources >= 5.10",
