@@ -1,48 +1,47 @@
-"""
-Warning and error routines.
+"""Warning and error routines.
+
 Copyright (c) Reuben Thomas 2023.
 Released under the GPL version 3, or (at your option) any later version.
 """
 
 import sys
+from collections.abc import Callable
+from typing import NoReturn, TextIO
 from warnings import warn
-from typing import Callable, Optional, Union, Type, NoReturn, TextIO
 
 
 # Error messages
 def simple_warning(prog: str) -> Callable[..., None]:
-    """
-    Make a simply-formatted `warnings.warn` routine to give console warnings
-    for a program invoked from the terminal.
+    """Make a simply-formatted `warnings.warn` routine.
+    
+    This is suitable for console warnings for a program invoked from the
+    terminal.
 
-    :param prog: the program's name
-    :type prog: str
-    :return: the warning function
-    :rtype: Callable[..., None]
+    Args:
+        prog (str): the program's name
+
+    Returns:
+        Callable[..., None]: the warning function
     """
-    def _warning(  # pylint: disable=too-many-arguments
-        message: Union[Warning, str],
-        category: Type[Warning],  # pylint: disable=unused-argument
-        filename: str,  # pylint: disable=unused-argument
-        lineno: int,  # pylint: disable=unused-argument
-        file: Optional[TextIO] = sys.stderr,
-        line: Optional[str] = None,  # pylint: disable=unused-argument
+    def _warning(
+        message: Warning | str,
+        category: type[Warning],
+        filename: str,
+        lineno: int,
+        file: TextIO | None = sys.stderr,
+        line: str | None = None,
     ) -> None:
         print(f"{prog}: {message}", file=file or sys.stderr)
 
     return _warning
 
 
-def die(msg: str, code: Optional[int] = 1) -> NoReturn:
-    """
-    Print a fatal error message and exit.
+def die(msg: str, code: int | None = 1) -> NoReturn:
+    """Print a fatal error message and exit.
 
-    :param msg: the error message
-    :type msg: str
-    :param code: exit code, defaults to 1
-    :type code: Optional[int], optional
-    :return: this function does not return
-    :rtype: NoReturn
+    Args:
+        msg (str): the error message
+        code (int | None, optional): . Defaults to 1.
     """
     warn(msg)
     sys.exit(code)

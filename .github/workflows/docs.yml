@@ -25,7 +25,7 @@ jobs:
       # Install all dependencies (including pdoc)
       - run: pip install -e . pdoc pygame i18nparse importlib-resources platformdirs pyscroll pytmx
       # Build your documentation into docs/.
-      - run: pdoc -o docs/ chambercourt
+      - run: pdoc --docformat google -o docs/ chambercourt
 
       - uses: actions/upload-pages-artifact@v3
         with:

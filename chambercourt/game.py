@@ -1,5 +1,4 @@
-"""
-ChamberCourt: Main game class.
+"""ChamberCourt: Main game class.
 
 © Reuben Thomas <rrt@sc3d.org> 2024
 Released under the GPL version 3, or (at your option) any later version.
@@ -15,11 +14,11 @@ import os
 import pickle
 import warnings
 import zipfile
+from collections.abc import Callable
 from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, List, Tuple
 
 import i18nparse  # type: ignore
 import importlib_resources
@@ -29,6 +28,7 @@ from .event import handle_global_keys, handle_quit_event, quit_game
 from .langdetect import language_code
 from .screen import Screen
 from .warnings_util import die, simple_warning
+
 
 # Import pygame, suppressing extra messages that it prints on startup.
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -46,8 +46,11 @@ if "LANG" not in os.environ:
         os.environ["LANG"] = lang
 i18nparse.activate()
 
+
 # Placeholder for gettext
-_: Callable[[str], str] = lambda _: _
+def _(message: str) -> str:
+    return message
+
 
 # Import pygame, suppressing extra messages that it prints on startup.
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -102,9 +105,9 @@ DEFAULT_VOLUME = 0.6
 
 
 class Game[Tile: StrEnum]:
-    """
-    The `Game` class represents the state of a games, including various
-    constant parameters such as screen size.
+    """The `Game` class represents the state of a games.game_to_screen.
+
+    This includes various constant parameters such as screen size.
     """
 
     def __init__(
@@ -114,8 +117,21 @@ class Game[Tile: StrEnum]:
         hero_tile: Tile,
         empty_tile: Tile,
         default_tile: Tile,
-        max_window_size: Tuple[int, int],
+        max_window_size: tuple[int, int],
     ) -> None:
+        """Create a Game object.
+
+        Args:
+            game_package_name (str): the name of the package
+            tile_constructor (Callable[[str], Tile]): the constructor of the
+              used `Tile` class
+            hero_tile (Tile): the tile for the hero in the given `Tile` set
+            empty_tile (Tile): the empty tile in the given `Tile` set
+            default_tile (Tile): the default tile returned for any
+              out-of-range coordinate in the given `Tile` set.
+            max_window_size (tuple[int, int]): a `(width, height)` pair
+              giving the maximum game window size in pixels.
+        """
         self.game_package_name = game_package_name
         self.tile_constructor = tile_constructor
         self.hero_tile = hero_tile
@@ -125,7 +141,7 @@ class Game[Tile: StrEnum]:
 
         self.screen: Screen
         self.levels: int
-        self.levels_files: List[Path]
+        self.levels_files: list[Path]
         self.hero_image: pygame.Surface
         self.die_image: pygame.Surface
         self.die_sound: pygame.mixer.Sound
@@ -152,65 +168,62 @@ class Game[Tile: StrEnum]:
 
     @staticmethod
     def description() -> str:
-        """
-        Returns a short description of the game, used in command-line
-        `--help`.
+        """Returns a short description of the game.
 
-        :return: description of the game
-        :rtype: str
+        Used in command-line `--help`.
+
+        Returns:
+            str: description of the game
         """
         return "Play a game."
 
     @staticmethod
     def instructions() -> str:
-        """
-        Instructions for the main game screen.
+        """Instructions for the main game screen.
 
-        :return: A possibly multi-line string. Should be pre-wrapped to the
+        Returns:
+            str: A possibly multi-line string. Should be pre-wrapped to the
             width of the screen, and contain three consecutive newlines to
             indicate the position of the level selector.
-        :rtype: str
         """
         return "Game instructions go here."
 
     @staticmethod
-    def screen_size() -> Tuple[int, int]:
-        """
-        Returns the size of the game screen.
+    def screen_size() -> tuple[int, int]:
+        """Returns the size of the game screen.
 
-        :return: A pair giving the `(height, width)` of the screen
-        :rtype: Tuple[int, int]
+        Returns:
+            tuple[int, int]: A pair giving the `(height, width)` of the
+              screen
         """
         return (1024, 768)
 
     @staticmethod
-    def window_size() -> Tuple[int, int]:
-        """
-        Returns the size of the game window, the area in which the game
-        world is shown.
+    def window_size() -> tuple[int, int]:
+        """Returns the size of the game window.
 
-        :return: A pair giving the `(height, width)` of the window.
-        :rtype: Tuple[int, int]
+        This is the area in which the game world is shown.
+
+        Returns:
+            tuple[int, int]: A pair giving the `(height, width)` of the
+              window.
         """
         return (640, 480)
 
     def load_assets(self, path: Path, levels_path: Path) -> None:
-        """
-        Load game assets from the levels directory.
+        """Load game assets from the levels directory.
 
-        :param levels_path: path to levels directory
-        :type _levels_path: Path
+        Args:
+            path (Path): path to assets
+            levels_path (Path): path to levels directory
         """
         self.app_icon = pygame.image.load(path / "app-icon.png")
         self.title_image = pygame.image.load(path / "title.png")
         self.hero_image = pygame.image.load(levels_path / "Hero.png")
         self.die_image = pygame.image.load(levels_path / "Die.png")
 
-
     def init_renderer(self) -> None:
-        """
-        Set up the `pyscroll.BufferedRenderer` and its camera (group).
-        """
+        """Set up the `pyscroll.BufferedRenderer` and its camera (group)."""
         self._map_layer = pyscroll.BufferedRenderer(
             self.map_data, (self.window_pixel_width, self.window_pixel_height)
         )
@@ -218,10 +231,10 @@ class Game[Tile: StrEnum]:
         self._group.add(self.hero)
 
     def restart_level(self) -> None:
-        """
-        Restart the current level. This method is used when starting a
-        level, when loading a saved position, when dying, and when
-        restarting a level.
+        """Restart the current level.
+
+        This method is used when starting a level, when loading a saved
+        position, when dying, and when restarting a level.
 
         It loads the level, and sets the game window size to fit.
         """
@@ -264,22 +277,20 @@ class Game[Tile: StrEnum]:
         self.init_physics()
 
     def start_level(self) -> None:
-        """
-        Start a level, saving the initial position.
-        """
+        """Start a level, saving the initial position."""
         self.restart_level()
         self.save_position()
 
     def get(self, pos: Vector2) -> Tile:
-        """
-        Return the tile at the given position.
+        """Return the tile at the given position.
 
-        :param pos: the `(x, y)` position required, in tile coordinates
-        :type pos: Vector2
-        :return: The `Tile` at the given position
-        :rtype: Tile
-        """
-        # Anything outside the map is a default tile
+        Args:
+            pos (Vector2): the `(x, y)` position required, in tile
+              coordinates
+
+        Returns:
+            Tile: the `Tile` at the given position
+        """        # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
             return self.default_tile
@@ -296,37 +307,32 @@ class Game[Tile: StrEnum]:
         # FIXME: We invoke protected methods and access protected members.
         ml = self._map_layer
         rect = (int(pos.x), int(pos.y), 1, 1)
-        # pylint: disable-next=protected-access
         ml._tile_queue = chain(ml._tile_queue, ml.data.get_tile_images_by_rect(rect))
-        # pylint: disable-next=protected-access
         self._map_layer._flush_tile_queue(self._map_layer._buffer)
 
     def set(self, pos: Vector2, tile: Tile) -> None:
-        """
-        Set the tile at the given position.
+        """Set the tile at the given position.
 
-        :param pos: the `(x, y)` position required, in tile coordinates
-        :type pos: Vector2
-        :param tile: the `Tile` to set at the given position
-        :type tile: Tile
+        Args:
+            pos (Vector2): the `(x, y)` position required, in tile
+              coordinates
+            tile (Tile): the `Tile` to set at the given position
         """
         # Update map twice, to allow for transparent tiles
         self._set(pos, self.empty_tile)
         self._set(pos, tile)
 
     def save_position(self) -> None:
-        """
-        Save the current position.
-        """
+        """Save the current position."""
         self.set(self.hero.position, self.hero_tile)
         with open(SAVED_POSITION_FILE, "wb") as fh:
             pickle.dump(self._map_blocks, fh)
         self.set(self.hero.position, self.empty_tile)
 
     def load_position(self) -> None:
-        """
-        Reload the saved position, if any. If there isn't one, nothing is
-        done.
+        """Reload the saved position, if any.
+
+        If there isn't one, nothing is done.
         """
         if SAVED_POSITION_FILE.exists():
             with open(SAVED_POSITION_FILE, "rb") as fh:
@@ -336,18 +342,15 @@ class Game[Tile: StrEnum]:
             self.init_physics()
 
     def draw(self) -> None:
-        """
-        Draw the current position.
-        """
+        """Draw the current position."""
         self._group.center(self.hero.rect.center)
         self._group.draw(self.game_surface)
 
-    def handle_joysticks(self) -> Tuple[int, int]:
-        """
-        Get joystick/gamepad input.
+    def handle_joysticks(self) -> tuple[int, int]:
+        """Get joystick/gamepad input.
 
-        :return: the desired unit velocity.
-        :rtype: Tuple[int, int]
+        Returns:
+            tuple[int, int]: the desired unit velocity
         """
         for event in pygame.event.get(pygame.JOYDEVICEADDED):
             joy = pygame.joystick.Joystick(event.device_index)
@@ -373,10 +376,11 @@ class Game[Tile: StrEnum]:
         return (dx, dy)
 
     def handle_input(self) -> None:
-        """
-        Handle input during the game. This handles all supported input
-        devices, and both in-game controls (including loading/saving
-        position etc.) and global controls (e.g. toggling fullscreen).
+        """Handle input during the game.
+
+        This handles all supported input devices, and both in-game controls
+        (including loading/saving position etc.) and global controls (e.g.
+        toggling fullscreen).
         """
         pressed = pygame.key.get_pressed()
         dx, dy = (0, 0)
@@ -408,9 +412,7 @@ class Game[Tile: StrEnum]:
             self.quit = True
 
     def die(self) -> None:
-        """
-        Handle the death of the hero.
-        """
+        """Handle the death of the hero."""
         self.die_sound.play()
         self.game_surface.blit(
             self.die_image,
@@ -424,17 +426,17 @@ class Game[Tile: StrEnum]:
         pygame.time.wait(1000)
         self.dead = False
 
-    def game_to_screen(self, x: int, y: int) -> Tuple[int, int]:
-        """
-        Convert game grid to screen coordinates.
-        FIXME: the arguments should be a tuple
+    def game_to_screen(self, x: int, y: int) -> tuple[int, int]:
+        """Convert game grid to screen coordinates.
 
-        :param x: grid x coordinate
-        :type x: int
-        :param y: grid y coordinate
-        :type y: int
-        :return: the corresponding screen coordinates
-        :rtype: Tuple[int, int]
+        FIXME: the arguments should be a tuple.
+
+        Args:
+            x (int): grid x coordinate
+            y (int): grid y coordinate
+
+        Returns:
+            tuple[int, int]: the corresponding screen coordinates
         """
         origin = self._map_layer.get_center_offset()
         return (origin[0] + x * self.block_pixels, origin[1] + y * self.block_pixels)
@@ -512,16 +514,13 @@ class Game[Tile: StrEnum]:
         return max(min(level, self.levels), 1)
 
     def shutdown(self) -> None:
-        """
-        Do any game-specific shutdown when the game ends.
-        """
+        """Do any game-specific shutdown when the game ends."""
 
     def run(self, level: int) -> None:
-        """
-        Run the game main loop, starting on the given level.
+        """Run the game main loop, starting on the given level.
 
-        :param level: the level to start at
-        :type level: int
+        Args:
+            level (int): the level to start at
         """
         self.quit = False
         self.level = level
@@ -574,9 +573,10 @@ class Game[Tile: StrEnum]:
         self.shutdown()
 
     def init_physics(self) -> None:
-        """
-        Initialise the game physics. This method should be overridden by
-        games with game-specific initialisation.
+        """Initialise the game physics.
+
+        This method should be overridden by games with game-specific
+        initialisation.
 
         The base class version finds the hero in the map and sets the
         corresponding tile to `EMPTY`.
@@ -589,20 +589,17 @@ class Game[Tile: StrEnum]:
                     self.set(self.hero.position, self.empty_tile)
 
     def do_physics(self) -> None:
-        """
-        A stub method intended to be overridden that implements the game
-        physics.
-        """
+        """Implement the game physics."""
 
     def can_move(self, velocity: Vector2) -> bool:
-        """
-        Determine whether the hero can move by the given displacement.
+        """Determine whether the hero can move by the given displacement.
 
-        :param velocity: the displacement unit vector
-        :type velocity: Vector2
-        :return: `True` if the player can move in that direction, or `False`
-            otherwise.
-        :rtype: bool
+        Args:
+            velocity (Vector2): the displacement unit vector
+
+        Returns:
+            bool: `True` if the player can move in that direction, or `False`
+              otherwise.
         """
         newpos = self.hero.position + velocity
         return (0 <= newpos.x < self.level_width) and (
@@ -610,16 +607,13 @@ class Game[Tile: StrEnum]:
         )
 
     def do_move(self) -> None:
-        """
-        A stub method intended to be overridden, to update the game state
-        when the player moves.
-        """
+        """Update the game state when the player moves."""
 
     def show_status(self) -> None:
-        """
-        Update the status display. This method prints the current level, and
-        should be overridden by game classes to print extra game-specific
-        information.
+        """Update the status display.
+
+        This method prints the current level, and should be overridden by
+        game classes to print extra game-specific information.
         """
         self.screen.print_screen(
             (0, 0),
@@ -632,30 +626,22 @@ class Game[Tile: StrEnum]:
         )
 
     def finished(self) -> bool:
-        """
-        Indicate whether the current level is finished. This method should
-        be overridden.
+        """Indicate whether the current level is finished.
 
-        :return: A flag indicating whether the current level is finished.
-        :rtype: bool
+        This method should be overridden.
+
+        Returns:
+            bool: a flag indicating whether the current level is finished
         """
         return False
 
-    def main(self, argv: List[str]) -> None:
-        """
-        Main function for the game.
+    def main(self, argv: list[str]) -> None:
+        """Main function for the game.
 
-        :param argv: command-line arguments.
-        :type argv: List[str]
-        :param game_package_name: the name of the game package
-        :type game_package_name: str
-        :param app_game_module: the game module
-        :type app_game_module: types.ModuleType
-        :param game_class: the game class, a subclass of `Game`
-        :type game_class: type[Game]
+        Args:
+            argv (list[str]): command-line arguments
         """
-
-        global _  # pylint: disable=global-statement
+        global _
 
         # Internationalise this module.
         with importlib_resources.as_file(importlib_resources.files()) as path:
@@ -682,7 +668,9 @@ class Game[Tile: StrEnum]:
                 "-V",
                 "--version",
                 action="version",
-                version=_("%(prog)s {} by {}").format(version, metadata["Author-email"]),
+                version=_("%(prog)s {} by {}").format(
+                    version, metadata["Author-email"]
+                ),
             )
             warnings.showwarning = simple_warning(parser.prog)
             args = parser.parse_args(argv)
@@ -694,7 +682,7 @@ class Game[Tile: StrEnum]:
             try:
                 real_levels_path: Path
                 if zipfile.is_zipfile(levels_path):
-                    tmpdir = TemporaryDirectory()  # pylint: disable=consider-using-with
+                    tmpdir = TemporaryDirectory()
                     real_levels_path = Path(tmpdir.name)
                     with zipfile.ZipFile(levels_path) as z:
                         z.extractall(real_levels_path)
@@ -702,9 +690,13 @@ class Game[Tile: StrEnum]:
                 else:
                     real_levels_path = Path(levels_path)
                 self.levels_files = sorted(
-                    [item for item in real_levels_path.iterdir() if item.suffix == ".tmx"]
+                    [
+                        item
+                        for item in real_levels_path.iterdir()
+                        if item.suffix == ".tmx"
+                    ]
                 )
-            except IOError as err:
+            except OSError as err:
                 die(_("Error reading levels: {}").format(err.strerror))
             self.levels = len(self.levels_files)
             if self.levels == 0:
@@ -733,15 +725,19 @@ class Game[Tile: StrEnum]:
             quit_game()
 
 
-class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
-    """
-    A class representing the hero.
+class Hero(pygame.sprite.Sprite):
+    """A class representing the hero.
 
-    :param sprite: The sprite used for the hero.
-    :type pygame.sprite.Sprite
+    Args:
+        pygame (pygame.sprite.Sprite): the sprite used for the hero.
     """
 
     def __init__(self, image: pygame.Surface) -> None:
+        """Create a Hero object.
+        
+        Args:
+            image (pygame.Surface): the hero image
+        """
         pygame.sprite.Sprite.__init__(self)
         self.image = image
         self.velocity = Vector2(0, 0)
@@ -751,11 +747,10 @@ class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
         self.block_pixels = self.image.get_width()
 
     def update(self, dt: float) -> None:
-        """
-        Move the hero according to its velocity for the given time interval.
+        """Move the hero according to its velocity for the given time interval.
 
-        :param dt: the elapsed time in milliseconds
-        :type dt: float
+        Args:
+            dt (float): the elapsed time in milliseconds
         """
         self.position += self.velocity * dt
         screen_pos = self.position * self.block_pixels

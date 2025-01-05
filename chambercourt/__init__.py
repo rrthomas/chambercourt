@@ -1,5 +1,4 @@
-"""
-ChamberCourt 2D grid game framework, based on PyGame.
+"""ChamberCourt 2D grid game framework, based on PyGame.
 
 © Reuben Thomas <rrt@sc3d.org> 2024
 Released under the GPL version 3, or (at your option) any later version.
@@ -7,17 +6,16 @@ Released under the GPL version 3, or (at your option) any later version.
 
 import re
 import sys
-from typing import List
 
 from .chambercourt_game import ChambercourtGame
 
 
-def main(argv: List[str] = sys.argv[1:]) -> None:
-    """
-    Main function for ChamberCourt bare-bones demo game.
+def main(argv: list[str] = sys.argv[1:]) -> None:
+    """Main function for ChamberCourt bare-bones demo game.
 
-    :param argv: command-line parameters, defaults to `sys.argv[1:]`
-    :type argv: List[str], optional
+    Args:
+        argv (_type_, optional): command-line parameters. Defaults to
+          sys.argv[1:].
     """
     ChambercourtGame().main(argv)
 

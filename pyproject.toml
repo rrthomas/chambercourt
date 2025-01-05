@@ -50,32 +50,16 @@ strict = true
 module = "chambercourt.ptext"
 ignore_errors = true
 
-[tool.pylint.main]
-# Use multiple processes to speed up Pylint: 0 = auto-detect.
-jobs = 0
-ignore-paths = ["chambercourt/ptext.py"]
-extension-pkg-whitelist = ["pygame"]
+[tool.ruff.lint]
+exclude = ["ptext.py"]
+select = ["D", "E", "F", "I", "UP"]
+ignore = ["D401", "E501"]
 
-[tool.pylint.MASTER]
-init-hook = 'import sys; sys.path.append(".")'
-init-import = "yes"
+[tool.ruff.lint.isort]
+lines-after-imports = 2
 
-[tool.pylint.format]
-const-naming-style = "any"
-disable = [
-    "fixme",
-    "too-many-arguments",
-    "too-many-branches",
-    "too-many-instance-attributes",
-    "too-many-locals",
-    "too-many-nested-blocks",
-    "too-many-positional-arguments",
-    "too-many-public-methods",
-    "too-many-statements",
-]
-enable = [
-    "useless-suppression",
-]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [[tool.cxfreeze.executables]]
 script = "chambercourt/__main__.py"

@@ -1,5 +1,4 @@
-"""
-ChamberCourt: Barebones derived game class.
+"""ChamberCourt: Barebones derived game class.
 
 © Reuben Thomas <rrt@sc3d.org> 2024
 Released under the GPL version 3, or (at your option) any later version.
@@ -11,9 +10,7 @@ from .game import Game
 
 
 class Tile(StrEnum):
-    """
-    An enumeration representing the available map tiles.
-    """
+    """An enumeration representing the available map tiles."""
 
     EMPTY = auto()
     BRICK = auto()
@@ -21,12 +18,13 @@ class Tile(StrEnum):
 
 
 class ChambercourtGame(Game[Tile]):
-    """
-    The `Game` class represents the state of a games, including various
-    constant parameters such as screen size.
+    """The `Game` class represents the state of a games.
+    
+    This includes various constant parameters such as screen size.
     """
 
     def __init__(self) -> None:
+        """Create a ChambercourtGame object."""
         super().__init__(
             "chambercourt",
             Tile,
