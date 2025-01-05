@@ -28,5 +28,4 @@ class ChambercourtGame(Game[Tile]):
             Tile.HERO,
             Tile.EMPTY,
             Tile.BRICK,
-            self.window_size,
         )

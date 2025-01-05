@@ -117,7 +117,6 @@ class Game[Tile: StrEnum]:
         hero_tile: Tile,
         empty_tile: Tile,
         default_tile: Tile,
-        max_window_size: tuple[int, int],
     ) -> None:
         """Create a Game object.
 
@@ -129,15 +128,12 @@ class Game[Tile: StrEnum]:
             empty_tile (Tile): the empty tile in the given `Tile` set
             default_tile (Tile): the default tile returned for any
               out-of-range coordinate in the given `Tile` set.
-            max_window_size (tuple[int, int]): a `(width, height)` pair
-              giving the maximum game window size in pixels.
         """
         self.game_package_name = game_package_name
         self.tile_constructor = tile_constructor
         self.hero_tile = hero_tile
         self.empty_tile = empty_tile
         self.default_tile = default_tile
-        self.max_window_size = max_window_size
 
         self.screen: Screen
         self.levels: int
@@ -239,11 +235,11 @@ class Game[Tile: StrEnum]:
         self.block_pixels = self.map_data.tile_size[0]
         self.window_pixel_width = min(
             self.level_width * self.block_pixels,
-            self.max_window_size[0],
+            self.window_size[0],
         )
         self.window_pixel_height = min(
             self.level_height * self.block_pixels,
-            self.max_window_size[1],
+            self.window_size[1],
         )
         self.window_scaled_width = self.window_pixel_width * self.screen.window_scale
         self.game_surface = pygame.Surface(
