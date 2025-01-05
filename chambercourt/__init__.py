@@ -9,8 +9,7 @@ import re
 import sys
 from typing import List
 
-from . import game
-from .game import app_main
+from .chambercourt_game import ChambercourtGame
 
 
 def main(argv: List[str] = sys.argv[1:]) -> None:
@@ -20,7 +19,7 @@ def main(argv: List[str] = sys.argv[1:]) -> None:
     :param argv: command-line parameters, defaults to `sys.argv[1:]`
     :type argv: List[str], optional
     """
-    app_main(argv, "chambercourt", game, game.Game)
+    ChambercourtGame().main(argv)
 
 
 if __name__ == "__main__":

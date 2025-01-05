@@ -10,7 +10,6 @@ readme = "README.md"
 urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
 requires-python = ">= 3.11"
 dependencies = [
-    "aenum",
     "i18nparse",
     "importlib-resources >= 5.10",
     "platformdirs",

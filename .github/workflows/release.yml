@@ -26,7 +26,7 @@ jobs:
       - name: Install non-Python build dependencies
         run: sudo apt-get -y install gettext
       - name: Install Python dependencies
-        run: pip install tox build aenum pygame i18nparse importlib-resources typing-extensions platformdirs pyscroll pytmx
+        run: pip install tox build pygame i18nparse importlib-resources platformdirs pyscroll pytmx
       - name: Build
         run: make dist
       - name: Make the release
@@ -60,7 +60,7 @@ jobs:
           nuget install Magick.NET-Q16-AnyCPU -Version 14.3.0 -OutputDirectory c:\nuget;
           Add-Content $env:GITHUB_PATH "C:\nuget\Magic.NET-Q16-AnyCPU.14.3.0\tools\bin"
       - name: Install Python dependencies
-        run: pip install tox build setuptools aenum pygame i18nparse importlib-resources typing-extensions platformdirs pyscroll pytmx
+        run: pip install tox build setuptools pygame i18nparse importlib-resources platformdirs pyscroll pytmx
       - name: Install additional dependencies for binary builds
         run: pip install pyinstaller
       - name: Build

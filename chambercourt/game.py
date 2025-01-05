@@ -13,13 +13,13 @@ import importlib.metadata
 import locale
 import os
 import pickle
-import types
 import warnings
 import zipfile
+from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Callable, List, Tuple
+from typing import Callable, List, Tuple
 
 import i18nparse  # type: ignore
 import importlib_resources
@@ -29,12 +29,6 @@ from .event import handle_global_keys, handle_quit_event, quit_game
 from .langdetect import language_code
 from .screen import Screen
 from .warnings_util import die, simple_warning
-
-# Fix type checking for aenum
-if TYPE_CHECKING:
-    from enum import Enum
-else:
-    from aenum import Enum
 
 # Import pygame, suppressing extra messages that it prints on startup.
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
@@ -46,7 +40,7 @@ with warnings.catch_warnings():
 locale.setlocale(locale.LC_ALL, "")
 
 # Try to set LANG for gettext if not already set
-if not "LANG" in os.environ:
+if "LANG" not in os.environ:
     lang = language_code()
     if lang is not None:
         os.environ["LANG"] = lang
@@ -107,41 +101,41 @@ DIGIT_KEYS = {
 DEFAULT_VOLUME = 0.6
 
 
-# We would like to use StrEnum + auto, but aenum does not support
-# extend_enum on StrEnums.
-class Tile(Enum):
-    """
-    An enumeration representing the available map tiles.
-    """
-    EMPTY = "empty"
-    BRICK = "brick"
-    HERO = "hero"
-
-
-class Game:
+class Game[Tile: StrEnum]:
     """
     The `Game` class represents the state of a games, including various
     constant parameters such as screen size.
     """
+
     def __init__(
         self,
-        screen: Screen,
+        game_package_name: str,
+        tile_constructor: Callable[[str], Tile],
+        hero_tile: Tile,
+        empty_tile: Tile,
+        default_tile: Tile,
         max_window_size: Tuple[int, int],
-        levels_path: os.PathLike[str],
-        hero_image: pygame.Surface,
-        die_image: pygame.Surface,
-        die_sound: pygame.mixer.Sound,
     ) -> None:
+        self.game_package_name = game_package_name
+        self.tile_constructor = tile_constructor
+        self.hero_tile = hero_tile
+        self.empty_tile = empty_tile
+        self.default_tile = default_tile
         self.max_window_size = max_window_size
+
+        self.screen: Screen
+        self.levels: int
+        self.levels_files: List[Path]
+        self.hero_image: pygame.Surface
+        self.die_image: pygame.Surface
+        self.die_sound: pygame.mixer.Sound
+        self.app_icon: pygame.Surface
+        self.title_image: pygame.Surface
         self.window_pixel_width: int
         self.window_pixel_height: int
-        self.screen = screen
         self.window_scaled_width: int
         self.window_pos = (0, 0)
         self.game_surface: pygame.Surface
-        self.hero_image = hero_image
-        self.die_image = die_image
-        self.die_sound = die_sound
         self.quit = False
         self.dead = False
         self.level = 1
@@ -155,26 +149,6 @@ class Game:
         self.hero: Hero
         self.map_data: pyscroll.data.TiledMapData
         self._joysticks: dict[int, pygame.joystick.JoystickType] = {}
-
-        # Load levels
-        try:
-            real_levels_path: Path
-            if zipfile.is_zipfile(levels_path):
-                tmpdir = TemporaryDirectory()  # pylint: disable=consider-using-with
-                real_levels_path = Path(tmpdir.name)
-                with zipfile.ZipFile(levels_path) as z:
-                    z.extractall(real_levels_path)
-                atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
-            else:
-                real_levels_path = Path(levels_path)
-            self.levels_files = sorted(
-                [item for item in real_levels_path.iterdir() if item.suffix == ".tmx"]
-            )
-        except IOError as err:
-            die(_("Error reading levels: {}").format(err.strerror))
-        self.levels = len(self.levels_files)
-        if self.levels == 0:
-            die(_("Could not find any levels"))
 
     @staticmethod
     def description() -> str:
@@ -220,14 +194,18 @@ class Game:
         """
         return (640, 480)
 
-    @staticmethod
-    def load_assets(_levels_path: Path) -> None:
+    def load_assets(self, path: Path, levels_path: Path) -> None:
         """
         Load game assets from the levels directory.
 
         :param levels_path: path to levels directory
         :type _levels_path: Path
         """
+        self.app_icon = pygame.image.load(path / "app-icon.png")
+        self.title_image = pygame.image.load(path / "title.png")
+        self.hero_image = pygame.image.load(levels_path / "Hero.png")
+        self.die_image = pygame.image.load(levels_path / "Die.png")
+
 
     def init_renderer(self) -> None:
         """
@@ -274,7 +252,9 @@ class Game:
         self._gids = {}
         for i in map_gids:
             gid = map_gids[i][0][0]
-            tile = Tile(self.map_data.tmx.get_tile_properties_by_gid(gid)["type"])
+            tile = self.tile_constructor(
+                self.map_data.tmx.get_tile_properties_by_gid(gid)["type"]
+            )
             self._gids[tile] = gid
 
         self.hero = Hero(self.hero_image)
@@ -299,14 +279,16 @@ class Game:
         :return: The `Tile` at the given position
         :rtype: Tile
         """
-        # Anything outside the map is a brick
+        # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
-            return Tile.BRICK
+            return self.default_tile
         block = self._map_blocks[y][x]
         if block == 0:  # Missing tiles are gaps
-            return Tile.EMPTY
-        return Tile(self.map_data.tmx.get_tile_properties(x, y, 0)["type"])
+            return self.empty_tile
+        return self.tile_constructor(
+            self.map_data.tmx.get_tile_properties(x, y, 0)["type"]
+        )
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
         self._map_blocks[int(pos.y)][int(pos.x)] = self._gids[tile]
@@ -329,17 +311,17 @@ class Game:
         :type tile: Tile
         """
         # Update map twice, to allow for transparent tiles
-        self._set(pos, Tile.EMPTY)
+        self._set(pos, self.empty_tile)
         self._set(pos, tile)
 
     def save_position(self) -> None:
         """
         Save the current position.
         """
-        self.set(self.hero.position, Tile.HERO)
+        self.set(self.hero.position, self.hero_tile)
         with open(SAVED_POSITION_FILE, "wb") as fh:
             pickle.dump(self._map_blocks, fh)
-        self.set(self.hero.position, Tile.EMPTY)
+        self.set(self.hero.position, self.empty_tile)
 
     def load_position(self) -> None:
         """
@@ -602,9 +584,9 @@ class Game:
         for x in range(self.level_width):
             for y in range(self.level_height):
                 block = self.get(Vector2(x, y))
-                if block == Tile.HERO:
+                if block == self.hero_tile:
                     self.hero.position = Vector2(x, y)
-                    self.set(self.hero.position, Tile.EMPTY)
+                    self.set(self.hero.position, self.empty_tile)
 
     def do_physics(self) -> None:
         """
@@ -659,6 +641,97 @@ class Game:
         """
         return False
 
+    def main(self, argv: List[str]) -> None:
+        """
+        Main function for the game.
+
+        :param argv: command-line arguments.
+        :type argv: List[str]
+        :param game_package_name: the name of the game package
+        :type game_package_name: str
+        :param app_game_module: the game module
+        :type app_game_module: types.ModuleType
+        :param game_class: the game class, a subclass of `Game`
+        :type game_class: type[Game]
+        """
+
+        global _  # pylint: disable=global-statement
+
+        # Internationalise this module.
+        with importlib_resources.as_file(importlib_resources.files()) as path:
+            cat = gettext.translation("chambercourt", path / "locale", fallback=True)
+            _ = cat.gettext
+
+        metadata = importlib.metadata.metadata(self.game_package_name)
+        version = importlib.metadata.version(self.game_package_name)
+
+        # Set app name for SDL
+        os.environ["SDL_APP_NAME"] = metadata["Name"]
+
+        with importlib_resources.as_file(
+            importlib_resources.files(self.game_package_name)
+        ) as path:
+            # Command-line arguments
+            parser = argparse.ArgumentParser(description=self.description())
+            parser.add_argument(
+                "--levels",
+                metavar="DIRECTORY",
+                help=_("a directory or Zip file of levels to use"),
+            )
+            parser.add_argument(
+                "-V",
+                "--version",
+                action="version",
+                version=_("%(prog)s {} by {}").format(version, metadata["Author-email"]),
+            )
+            warnings.showwarning = simple_warning(parser.prog)
+            args = parser.parse_args(argv)
+
+            app_path = Path(args.levels or path)
+            levels_path = app_path / "levels"
+
+            # Load levels
+            try:
+                real_levels_path: Path
+                if zipfile.is_zipfile(levels_path):
+                    tmpdir = TemporaryDirectory()  # pylint: disable=consider-using-with
+                    real_levels_path = Path(tmpdir.name)
+                    with zipfile.ZipFile(levels_path) as z:
+                        z.extractall(real_levels_path)
+                    atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
+                else:
+                    real_levels_path = Path(levels_path)
+                self.levels_files = sorted(
+                    [item for item in real_levels_path.iterdir() if item.suffix == ".tmx"]
+                )
+            except IOError as err:
+                die(_("Error reading levels: {}").format(err.strerror))
+            self.levels = len(self.levels_files)
+            if self.levels == 0:
+                die(_("Could not find any levels"))
+
+            pygame.init()
+            self.load_assets(app_path, levels_path)
+            pygame.display.set_icon(self.app_icon)
+            pygame.mouse.set_visible(False)
+            pygame.font.init()
+            pygame.key.set_repeat()
+            pygame.joystick.init()
+            pygame.display.set_caption(metadata["Name"])
+            self.screen = Screen(self.screen_size(), str(path / "acorn-mode-1.ttf"), 2)
+            die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
+            die_sound.set_volume(DEFAULT_VOLUME)
+
+        try:
+            while True:
+                level = self.title_screen(
+                    self.title_image.convert(),
+                    self.instructions(),
+                )
+                self.run(level)
+        except KeyboardInterrupt:
+            quit_game()
+
 
 class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
     """
@@ -667,6 +740,7 @@ class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
     :param sprite: The sprite used for the hero.
     :type pygame.sprite.Sprite
     """
+
     def __init__(self, image: pygame.Surface) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.image = image
@@ -686,97 +760,3 @@ class Hero(pygame.sprite.Sprite):  # pylint: disable=too-few-public-methods
         self.position += self.velocity * dt
         screen_pos = self.position * self.block_pixels
         self.rect.topleft = (int(screen_pos.x), int(screen_pos.y))
-
-
-def app_main(
-    argv: List[str],
-    game_package_name: str,
-    app_game_module: types.ModuleType,
-    game_class: type[Game],
-) -> None:
-    """
-    Main function for the game.
-
-    :param argv: command-line arguments.
-    :type argv: List[str]
-    :param game_package_name: the name of the game package
-    :type game_package_name: str
-    :param app_game_module: the game module
-    :type app_game_module: types.ModuleType
-    :param game_class: the game class, a subclass of `Game`
-    :type game_class: type[Game]
-    """
-
-    global _  # pylint: disable=global-statement
-
-    # Internationalise this module.
-    with importlib_resources.as_file(importlib_resources.files()) as path:
-        cat = gettext.translation("chambercourt", path / "locale", fallback=True)
-        _ = cat.gettext
-
-    metadata = importlib.metadata.metadata(game_package_name)
-    version = importlib.metadata.version(game_package_name)
-
-    # Set app name for SDL
-    os.environ["SDL_APP_NAME"] = metadata["Name"]
-
-    with importlib_resources.as_file(
-        importlib_resources.files(app_game_module)
-    ) as path:
-        # Internationalise the game module.
-        app_cat = gettext.translation(game_package_name, path / "locale", fallback=True)
-        app_game_module._ = app_cat.gettext  # type: ignore[attr-defined]
-
-        # Command-line arguments
-        parser = argparse.ArgumentParser(description=game_class.description())
-        parser.add_argument(
-            "--levels",
-            metavar="DIRECTORY",
-            help=_("a directory or Zip file of levels to use"),
-        )
-        parser.add_argument(
-            "-V",
-            "--version",
-            action="version",
-            version=_("%(prog)s {} by {}").format(version, metadata["Author-email"]),
-        )
-        warnings.showwarning = simple_warning(parser.prog)
-        args = parser.parse_args(argv)
-
-        levels_path = Path(args.levels or path / "levels")
-
-        # Load assets.
-        app_icon = pygame.image.load(path / "app-icon.png")
-        title_image = pygame.image.load(path / "title.png")
-        hero_image = pygame.image.load(levels_path / "Hero.png")
-        die_image = pygame.image.load(levels_path / "Die.png")
-
-        pygame.init()
-        pygame.display.set_icon(app_icon)
-        pygame.mouse.set_visible(False)
-        pygame.font.init()
-        pygame.key.set_repeat()
-        pygame.joystick.init()
-        pygame.display.set_caption(metadata["Name"])
-        screen = Screen(game_class.screen_size(), str(path / "acorn-mode-1.ttf"), 2)
-        die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
-        die_sound.set_volume(DEFAULT_VOLUME)
-        game_class.load_assets(levels_path)
-        game = game_class(
-            screen,
-            game_class.window_size(),
-            levels_path,
-            hero_image,
-            die_image,
-            die_sound,
-        )
-
-    try:
-        while True:
-            level = game.title_screen(
-                title_image.convert(),
-                game_class.instructions(),
-            )
-            game.run(level)
-    except KeyboardInterrupt:
-        quit_game()
