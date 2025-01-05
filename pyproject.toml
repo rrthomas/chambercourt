@@ -3,9 +3,7 @@ name = "ChamberCourt"
 version = "0.9.6"
 description = "Simple 2D grid game framework based on PyGame"
 license = {text = "GPL v3 or later"}
-authors = [
-    {name = "Reuben Thomas", email = "rrt@sc3d.org"}
-]
+authors = [{name = "Reuben Thomas", email = "rrt@sc3d.org"}]
 readme = "README.md"
 urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
 requires-python = ">= 3.12"
@@ -28,15 +26,10 @@ classifiers = [
 chambercourt = "chambercourt:main"
 
 [build-system]
-requires = [
-    "build",
-    "setuptools >= 62.3.0",
-]
+requires = ["build", "setuptools >= 62.3.0"]
 
 [tool.setuptools]
-packages = [
-    "chambercourt",
-]
+packages = ["chambercourt"]
 
 [tool.setuptools.package-data]
 chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo", "py.typed"]
