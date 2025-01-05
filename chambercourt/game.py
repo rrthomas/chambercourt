@@ -701,8 +701,8 @@ class Game[Tile: StrEnum]:
             pygame.joystick.init()
             pygame.display.set_caption(metadata["Name"])
             self.screen = Screen(self.screen_size, str(path / "acorn-mode-1.ttf"), 2)
-            die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
-            die_sound.set_volume(DEFAULT_VOLUME)
+            self.die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
+            self.die_sound.set_volume(DEFAULT_VOLUME)
 
         try:
             while True:
