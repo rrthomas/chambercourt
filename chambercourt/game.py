@@ -146,6 +146,7 @@ class Game[Tile: StrEnum]:
         self.window_pixel_width: int
         self.window_pixel_height: int
         self.window_scaled_width: int
+        self.window_scaled_height: int
         self.window_pos = (0, 0)
         self.game_surface: pygame.Surface
         self.quit = False
@@ -247,9 +248,17 @@ class Game[Tile: StrEnum]:
             self.level_height * self.block_pixels,
             self.window_size[1],
         )
-        self.window_scaled_width = self.window_pixel_width * self.screen.window_scale
+        (self.window_scaled_width, self.window_scaled_height) = (
+            self.window_pixel_width * self.screen.window_scale,
+            self.window_pixel_height * self.screen.window_scale,
+        )
         self.game_surface = pygame.Surface(
             (self.window_pixel_width, self.window_pixel_height)
+        )
+        self.window_pos = (
+            (self.screen.surface.get_width() - self.window_scaled_width) // 2,
+            (self.screen.surface.get_height() - self.window_scaled_height) // 2
+            + 4 * self.screen.window_scale,
         )
 
         # Dict mapping tileset GIDs to map gids
