@@ -18,10 +18,7 @@ class Tile(StrEnum):
 
 
 class ChambercourtGame(Game[Tile]):
-    """The `Game` class represents the state of a games.
-    
-    This includes various constant parameters such as screen size.
-    """
+    """A skeleton `Game` class."""
 
     def __init__(self) -> None:
         """Create a ChambercourtGame object."""

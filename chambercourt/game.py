@@ -105,7 +105,7 @@ DEFAULT_VOLUME = 0.6
 
 
 class Game[Tile: StrEnum]:
-    """The `Game` class represents the state of a games.game_to_screen.
+    """The `Game` class represents the state of a game.
 
     This includes various constant parameters such as screen size.
     """
