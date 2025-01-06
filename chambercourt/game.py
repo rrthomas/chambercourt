@@ -67,10 +67,6 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 SAVED_POSITION_FILE = DATA_DIR / "saved_position.pkl"
 
 
-FRAMES_PER_SECOND = 30
-SUBFRAMES = 4
-
-
 def clear_keys() -> None:
     """Discard outstanding keypress events."""
     for _event in pygame.event.get(pygame.KEYDOWN):
@@ -212,6 +208,12 @@ class Game[Tile: StrEnum]:
 
     The font is scaled by `window_scale` and then by this factor.
     """
+
+    frames_per_second = 30
+    """Frames per second for the game main loop."""
+
+    subframes = 4
+    """Number of frames over which to animate each hero move."""
 
     def load_assets(self, path: Path, levels_path: Path) -> None:
         """Load game assets from the levels directory.
@@ -520,7 +522,7 @@ class Game[Tile: StrEnum]:
                 else:
                     level = 0
                 handle_global_keys(event)
-            clock.tick(FRAMES_PER_SECOND)
+            clock.tick(self.frames_per_second)
         return max(min(level, self.levels), 1)
 
     def shutdown(self) -> None:
@@ -546,7 +548,7 @@ class Game[Tile: StrEnum]:
                 self.load_position()
                 subframe = 0
                 while not self.quit and not self.dead and not self.finished():
-                    clock.tick(FRAMES_PER_SECOND)
+                    clock.tick(self.frames_per_second)
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             quit_game()
@@ -562,8 +564,8 @@ class Game[Tile: StrEnum]:
                         if self.hero.velocity != Vector2(0, 0):
                             self.do_move()
                             subframe = 0
-                    self._group.update(1 / SUBFRAMES)
-                    if subframe == SUBFRAMES - 1:
+                    self._group.update(1 / self.subframes)
+                    if subframe == self.subframes - 1:
                         self.do_physics()
                     self.draw()
                     self.show_status()
@@ -571,7 +573,7 @@ class Game[Tile: StrEnum]:
                         self.screen.scale_surface(self.game_surface), self.window_pos
                     )
                     self.screen.show_screen()
-                    subframe = (subframe + 1) % SUBFRAMES
+                    subframe = (subframe + 1) % self.subframes
                     if subframe == 0:
                         self.hero.velocity = Vector2(0, 0)
                 if self.dead:
