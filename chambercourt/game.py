@@ -209,10 +209,10 @@ class Game[Tile: StrEnum]:
     The font is scaled by `window_scale` and then by this factor.
     """
 
-    frames_per_second = 30
+    frames_per_second = 60
     """Frames per second for the game main loop."""
 
-    subframes = 4
+    subframes = 8
     """Number of frames over which to animate each hero move."""
 
     def load_assets(self, path: Path, levels_path: Path) -> None:
