@@ -687,8 +687,8 @@ class Game[Tile: StrEnum]:
             warnings.showwarning = simple_warning(parser.prog)
             args = parser.parse_args(argv)
 
-            app_path = Path(args.levels or path)
-            levels_path = app_path / "levels"
+            app_path = Path(path)
+            levels_path = Path(args.levels or app_path / "levels")
 
             # Load levels
             try:
