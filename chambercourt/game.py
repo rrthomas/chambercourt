@@ -705,7 +705,7 @@ class Game[Tile: StrEnum]:
                     [
                         item
                         for item in real_levels_path.iterdir()
-                        if item.suffix == ".tmx"
+                        if (not str(item.name).startswith(".")) and item.suffix == ".tmx"
                     ]
                 )
             except OSError as err:
