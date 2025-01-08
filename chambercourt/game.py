@@ -525,8 +525,11 @@ class Game[Tile: StrEnum]:
             clock.tick(self.frames_per_second)
         return max(min(level, self.levels), 1)
 
-    def shutdown(self) -> None:
-        """Do any game-specific shutdown when the game ends."""
+    def end_game(self) -> None:
+        """Do any game-specific tear-down when the game ends."""
+
+    def stop_play(self) -> None:
+        """Do any game-specific tear-down when play is interrupted."""
 
     def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
@@ -576,13 +579,14 @@ class Game[Tile: StrEnum]:
                     subframe = (subframe + 1) % self.subframes
                     if subframe == 0:
                         self.hero.velocity = Vector2(0, 0)
+                self.stop_play()
                 if self.dead:
                     self.die()
             if self.finished():
                 self.level += 1
         if self.level > self.levels:
             self.splurge(self.hero.image)
-        self.shutdown()
+        self.end_game()
 
     def init_physics(self) -> None:
         """Initialise the game physics.
