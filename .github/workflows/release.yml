@@ -24,7 +24,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install non-Python build dependencies
-        run: sudo apt-get -y install gettext
+        run: |
+          sudo apt-get -y install gettext
+          npm install -g pyright
       - name: Install Python dependencies
         run: pip install tox build pygame i18nparse platformdirs pyscroll pytmx
       - name: Build
@@ -59,6 +61,8 @@ jobs:
           Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin";
           nuget install Magick.NET-Q16-AnyCPU -Version 14.3.0 -OutputDirectory c:\nuget;
           Add-Content $env:GITHUB_PATH "C:\nuget\Magic.NET-Q16-AnyCPU.14.3.0\tools\bin"
+      - name: Install pyright
+        run: npm install -g pyright
       - name: Install Python dependencies
         run: pip install tox build setuptools pygame i18nparse platformdirs pyscroll pytmx
       - name: Install additional dependencies for binary builds

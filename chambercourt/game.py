@@ -244,7 +244,7 @@ class Game[Tile: StrEnum]:
         It loads the level, and sets the game window size to fit.
         """
         self.dead = False
-        tmx_data = pytmx.load_pygame(self.levels_files[self.level - 1])
+        tmx_data = pytmx.load_pygame(str(self.levels_files[self.level - 1]))
         self.map_data = pyscroll.data.TiledMapData(tmx_data)
         self._map_blocks = self.map_data.tmx.layers[0].data
         (self.level_width, self.level_height) = self.map_data.map_size
@@ -277,9 +277,9 @@ class Game[Tile: StrEnum]:
         self._gids = {}
         for i in map_gids:
             gid = map_gids[i][0][0]
-            tile = self.tile_constructor(
-                self.map_data.tmx.get_tile_properties_by_gid(gid)["type"]
-            )
+            properties = self.map_data.tmx.get_tile_properties_by_gid(gid)
+            assert type(properties) is dict
+            tile = self.tile_constructor(properties["type"])
             self._gids[tile] = gid
 
         self.hero = Hero(self.hero_image)
@@ -306,20 +306,22 @@ class Game[Tile: StrEnum]:
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
             return self.default_tile
-        block = self._map_blocks[y][x]
+        block = self._map_blocks[y][x]  # pyright: ignore
         if block == 0:  # Missing tiles are gaps
             return self.empty_tile
-        return self.tile_constructor(
-            self.map_data.tmx.get_tile_properties(x, y, 0)["type"]
-        )
+        properties = self.map_data.tmx.get_tile_properties(x, y, 0)
+        assert type(properties) is dict
+        return self.tile_constructor(properties["type"])
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
-        self._map_blocks[int(pos.y)][int(pos.x)] = self._gids[tile]
+        self._map_blocks[int(pos.y)][int(pos.x)] = self._gids[tile]  # pyright: ignore
         # Update rendered map
         # NOTE: We invoke protected methods and access protected members.
         ml = self._map_layer
         rect = (int(pos.x), int(pos.y), 1, 1)
+        assert ml._tile_queue is not None
         ml._tile_queue = chain(ml._tile_queue, ml.data.get_tile_images_by_rect(rect))
+        assert type(self._map_layer._buffer) is pygame.Surface
         self._map_layer._flush_tile_queue(self._map_layer._buffer)
 
     def set(self, pos: Vector2, tile: Tile) -> None:
@@ -709,7 +711,8 @@ class Game[Tile: StrEnum]:
                     [
                         item
                         for item in real_levels_path.iterdir()
-                        if (not str(item.name).startswith(".")) and item.suffix == ".tmx"
+                        if (not str(item.name).startswith("."))
+                        and item.suffix == ".tmx"
                     ]
                 )
             except OSError as err:

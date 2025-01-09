@@ -34,13 +34,8 @@ packages = ["chambercourt"]
 [tool.setuptools.package-data]
 chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo", "py.typed"]
 
-[tool.mypy]
-exclude = ['^dist', '^build']
-strict = true
-
-[[tool.mypy.overrides]]
-module = "chambercourt.ptext"
-ignore_errors = true
+[tool.pyright]
+ignore = ["/usr/**", "chambercourt/ptext.py"]
 
 [tool.ruff.lint]
 exclude = ["ptext.py"]
