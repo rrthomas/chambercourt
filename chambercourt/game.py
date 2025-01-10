@@ -35,6 +35,10 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import pygame
+    import pyscroll  # type: ignore
+    import pytmx  # type: ignore
+    from pygame import Rect, Vector2
+    from pytmx.util_pygame import pygame_image_loader
 
 
 locale.setlocale(locale.LC_ALL, "")
@@ -50,16 +54,6 @@ i18nparse.activate()
 # Placeholder for gettext
 def _(message: str) -> str:
     return message
-
-
-# Import pygame, suppressing extra messages that it prints on startup.
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    import pygame
-    import pyscroll  # type: ignore
-    import pytmx  # type: ignore
-    from pygame import Vector2
 
 
 DATA_DIR = Path(user_data_dir("chambercourt"))
@@ -215,17 +209,35 @@ class Game[Tile: StrEnum]:
     subframes = 8
     """Number of frames over which to animate each hero move."""
 
-    def load_assets(self, path: Path, levels_path: Path) -> None:
-        """Load game assets from the levels directory.
+    def find_asset(self, asset_file: str) -> Path:
+        """Find a game asset.
+
+        First look at the given level files directory, then fall back to the
+        default levels directory.
+
+        Args:
+            asset_file (str): name of asset file
+        """
+        levels_asset = Path(asset_file)
+        if levels_asset.exists():
+            return levels_asset
+        else:
+            fallback_asset = Path(self.app_path / "levels" / asset_file)
+            if fallback_asset.exists():
+                return fallback_asset
+        raise OSError(_("cannot find asset `{}'").format(asset_file))
+
+    def load_assets(self) -> None:
+        """Load game assets.
 
         Args:
             path (Path): path to assets
             levels_path (Path): path to levels directory
         """
-        self.app_icon = pygame.image.load(path / "app-icon.png")
-        self.title_image = pygame.image.load(path / "title.png")
-        self.hero_image = pygame.image.load(levels_path / "Hero.png")
-        self.die_image = pygame.image.load(levels_path / "Die.png")
+        self.app_icon = pygame.image.load(self.find_asset("app-icon.png"))
+        self.title_image = pygame.image.load(self.find_asset("title.png"))
+        self.hero_image = pygame.image.load(self.find_asset("Hero.png"))
+        self.die_image = pygame.image.load(self.find_asset("Die.png"))
 
     def init_renderer(self) -> None:
         """Set up the `pyscroll.BufferedRenderer` and its camera (group)."""
@@ -234,6 +246,21 @@ class Game[Tile: StrEnum]:
         )
         self._group = pyscroll.PyscrollGroup(map_layer=self._map_layer)
         self._group.add(self.hero)
+
+    def image_loader(
+        self, filename: str, colorkey: pytmx.pytmx.ColorLike | None, **kwargs
+    ) -> Callable[[Rect, int], pygame.Surface]:
+        """Wrapper for pygame_image_loader for ChamberCourt assets.
+
+        Args:
+            filename (Path): asset name; only the basename is used
+            colorkey (Optional[ColorLike]): as for `pygame_image_loader`
+            kwargs (dict): as for `pygame_image_loader`.
+
+        Returns:
+            Callable[[Rect, int], TiledElement]: _description_
+        """
+        return pygame_image_loader(str(self.find_asset(Path(filename).name)), colorkey, **kwargs)
 
     def restart_level(self) -> None:
         """Restart the current level.
@@ -244,7 +271,9 @@ class Game[Tile: StrEnum]:
         It loads the level, and sets the game window size to fit.
         """
         self.dead = False
-        tmx_data = pytmx.load_pygame(str(self.levels_files[self.level - 1]))
+        tmx_data = pytmx.TiledMap(
+            str(self.levels_files[self.level - 1]), image_loader=self.image_loader
+        )
         self.map_data = pyscroll.data.TiledMapData(tmx_data)
         self._map_blocks = self.map_data.tmx.layers[0].data
         (self.level_width, self.level_height) = self.map_data.map_size
@@ -722,7 +751,9 @@ class Game[Tile: StrEnum]:
                 die(_("Could not find any levels"))
 
             pygame.init()
-            self.load_assets(app_path, levels_path)
+            self.app_path = app_path
+            self.levels_path = levels_path
+            self.load_assets()
             pygame.display.set_icon(self.app_icon)
             pygame.mouse.set_visible(False)
             pygame.font.init()
@@ -736,7 +767,7 @@ class Game[Tile: StrEnum]:
                 self.font_scale,
                 self.background_colour,
             )
-            self.die_sound = pygame.mixer.Sound(levels_path / "Die.wav")
+            self.die_sound = pygame.mixer.Sound(str(self.find_asset("Die.wav")))
             self.die_sound.set_volume(DEFAULT_VOLUME)
 
         try:
