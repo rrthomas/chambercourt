@@ -31,5 +31,5 @@ def handle_quit_event() -> None:
 
 def handle_global_keys(event: pygame.event.Event) -> None:
     """React to keypresses that work anywhere in the game."""
-    if event.key == pygame.K_F11:
+    if event.key == pygame.K_f:
         pygame.display.toggle_fullscreen()
