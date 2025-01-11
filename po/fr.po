@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 00:13+0000\n"
+"POT-Creation-Date: 2025-01-11 12:26+0000\n"
 "PO-Revision-Date: 2025-01-05 17:00+0000\n"
 "Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
 "Language: French\n"
@@ -14,39 +14,42 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-#: chambercourt/game.py:171
+#: chambercourt/game.py:170
 msgid "Play a game."
 msgstr "Joue un jeu."
 
-#: chambercourt/game.py:182
+#: chambercourt/game.py:181
 msgid "Game instructions go here."
 msgstr "Les instructions du jeu se mettent ici."
 
-#: chambercourt/game.py:252
-msgid "map tiles must be square"
-msgstr "les tuiles doivent être carrées"
+#: chambercourt/game.py:233
+msgid "cannot find asset `{}'"
+msgstr ""
 
-#: chambercourt/game.py:495
+#: chambercourt/game.py:553
 msgid "Start level: {}/{}"
 msgstr "Niveau à commencer: {}/{}"
 
-#: chambercourt/game.py:632
+#: chambercourt/game.py:694
 msgid "Level {}:"
 msgstr "Niveau {}:"
 
-#: chambercourt/game.py:677
+#: chambercourt/game.py:739
 msgid "a directory or Zip file of levels to use"
 msgstr "un répertoire ou fichier Zip de niveaux à utiliser"
 
-#: chambercourt/game.py:683
+#: chambercourt/game.py:745
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr "%(prog)s {} de {}"
 
-#: chambercourt/game.py:712
+#: chambercourt/game.py:794
 msgid "Error reading levels: {}"
 msgstr "Erreur en chargeant les niveaux: {}"
 
-#: chambercourt/game.py:715
+#: chambercourt/game.py:797
 msgid "Could not find any levels"
 msgstr "Aucun niveau trouvé"
+
+#~ msgid "map tiles must be square"
+#~ msgstr "les tuiles doivent être carrées"

@@ -145,10 +145,12 @@ class Game[Tile: StrEnum]:
         self.level = 1
         self.level_width: int
         self.level_height: int
-        self.block_pixels: int
-        self.tmx_data: dict[Path, pytmx.TiledMap]
-        self.map_blocks: dict[Path, pytmx.TiledTileLayer]
-        self._map_blocks: pytmx.TiledTileLayer
+        self.tile_width: int
+        self.tile_height: int
+        self.tmx_data: dict[Path, pytmx.TiledMap] = {}
+        self.map_tiles: dict[Path, pytmx.TiledTileLayer] = {}
+        self.map_timestamp: dict[Path, float] = {}
+        self._map_tiles: pytmx.TiledTileLayer
         self._gids: dict[Tile, int]
         self._map_layer: pyscroll.BufferedRenderer
         self._group: pyscroll.PyscrollGroup
@@ -276,19 +278,16 @@ class Game[Tile: StrEnum]:
         It loads the level, and sets the game window size to fit.
         """
         self.dead = False
-        tmx_data = self.tmx_data[self.levels_files[self.level - 1]]
-        self.map_data = pyscroll.data.TiledMapData(tmx_data)
-        self.set_map(copy.deepcopy(self.map_blocks[self.levels_files[self.level - 1]]))
+        level_file = self.levels_files[self.level - 1]
+        self.load_level(level_file)
         (self.level_width, self.level_height) = self.map_data.map_size
-        if self.map_data.tile_size[0] != self.map_data.tile_size[1]:
-            raise Exception(_("map tiles must be square"))
-        self.block_pixels = self.map_data.tile_size[0]
+        (self.tile_width, self.tile_height) = self.map_data.tile_size
         self.window_pixel_width = min(
-            self.level_width * self.block_pixels,
+            self.level_width * self.tile_width,
             self.window_size[0],
         )
         self.window_pixel_height = min(
-            self.level_height * self.block_pixels,
+            self.level_height * self.tile_height,
             self.window_size[1],
         )
         (self.window_scaled_width, self.window_scaled_height) = (
@@ -338,7 +337,7 @@ class Game[Tile: StrEnum]:
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
             return self.default_tile
-        block = self._map_blocks[y][x]  # pyright: ignore
+        block = self._map_tiles[y][x]  # pyright: ignore
         if block == 0:  # Missing tiles are gaps
             return self.empty_tile
         properties = self.map_data.tmx.get_tile_properties(x, y, 0)
@@ -346,7 +345,7 @@ class Game[Tile: StrEnum]:
         return self.tile_constructor(properties["type"])
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
-        self._map_blocks[int(pos.y)][int(pos.x)] = self._gids[tile]  # pyright: ignore
+        self._map_tiles[int(pos.y)][int(pos.x)] = self._gids[tile]  # pyright: ignore
         # Update rendered map
         # NOTE: We invoke protected methods and access protected members.
         ml = self._map_layer
@@ -368,20 +367,37 @@ class Game[Tile: StrEnum]:
         self._set(pos, self.empty_tile)
         self._set(pos, tile)
 
-    def set_map(self, map_blocks: pytmx.TiledTileLayer) -> None:
+    def set_map(self, map_tiles: pytmx.TiledTileLayer) -> None:
         """Set the current map.
 
         Args:
-            map_blocks (pytmx.TiledTileLayer): the tile data to use.
+            map_tiles (pytmx.TiledTileLayer): the tile data to use.
         """
-        self._map_blocks = map_blocks
-        self.map_data.tmx.layers[0].data = self._map_blocks
+        self._map_tiles = map_tiles
+        self.map_data.tmx.layers[0].data = self._map_tiles
+
+    def load_level(self, level: Path) -> None:
+        """Load map data for given level path.
+
+        Reload only if the file has changed.
+
+        Args:
+            level (Path): path to level file
+        """
+        mtime = level.stat().st_mtime
+        if mtime > self.map_timestamp[level]:
+            self.map_timestamp[level] = mtime
+            map_data = pytmx.TiledMap(str(level), image_loader=self.image_loader)
+            self.tmx_data[level] = map_data
+            self.map_tiles[level] = copy.deepcopy(self.tmx_data[level].layers[0].data)
+        self.map_data = pyscroll.data.TiledMapData(self.tmx_data[level])
+        self.set_map(copy.deepcopy(self.map_tiles[level]))
 
     def save_position(self) -> None:
         """Save the current position."""
         self.set(self.hero.position, self.hero_tile)
         with open(SAVED_POSITION_FILE, "wb") as fh:
-            pickle.dump(self._map_blocks, fh)
+            pickle.dump(self._map_tiles, fh)
         self.set(self.hero.position, self.empty_tile)
 
     def load_position(self) -> None:
@@ -491,8 +507,8 @@ class Game[Tile: StrEnum]:
         """
         origin = self._map_layer.get_center_offset()
         return (
-            origin[0] + pos[0] * self.block_pixels,
-            origin[1] + pos[1] * self.block_pixels,
+            origin[0] + pos[0] * self.tile_width,
+            origin[1] + pos[1] * self.tile_height,
         )
 
     def splurge(self, sprite: pygame.Surface) -> None:
@@ -779,15 +795,9 @@ class Game[Tile: StrEnum]:
             self.levels = len(self.levels_files)
             if self.levels == 0:
                 die(_("Could not find any levels"))
-            self.tmx_data = {}
-            self.map_blocks = {}
             for level in self.levels_files:
-                self.tmx_data[level] = pytmx.TiledMap(
-                    str(level), image_loader=self.image_loader
-                )
-                self.map_blocks[level] = copy.deepcopy(
-                    self.tmx_data[level].layers[0].data
-                )
+                self.map_timestamp[level] = 0
+                self.load_level(level)
 
         # Main loop
         try:
@@ -819,8 +829,7 @@ class Hero(pygame.sprite.Sprite):
         self.velocity = Vector2(0, 0)
         self.position = Vector2(0, 0)
         self.rect = self.image.get_rect()
-        assert self.image.get_width() == self.image.get_height()
-        self.block_pixels = self.image.get_width()
+        self.tile_size = Vector2(self.image.get_width(), self.image.get_height())
 
     def update(self, dt: float) -> None:
         """Move the hero according to its velocity for the given time interval.
@@ -829,5 +838,7 @@ class Hero(pygame.sprite.Sprite):
             dt (float): the elapsed time in milliseconds
         """
         self.position += self.velocity * dt
-        screen_pos = self.position * self.block_pixels
+        screen_pos = Vector2(
+            self.position.x * self.tile_size.x, self.position.y * self.tile_size.y
+        )
         self.rect.topleft = (int(screen_pos.x), int(screen_pos.y))
