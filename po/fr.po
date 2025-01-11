@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-11 20:06+0000\n"
+"POT-Creation-Date: 2025-01-11 21:17+0000\n"
 "PO-Revision-Date: 2025-01-11 17:09+0000\n"
 "Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
 "Language: French\n"
@@ -18,48 +18,76 @@ msgstr ""
 msgid "Play a game."
 msgstr "Joue un jeu."
 
-#: chambercourt/game.py:181
-msgid ""
-"Game instructions go here.\n"
-"\n"
-"\n"
-" (choose with movement keys and digits)\n"
-"\n"
-"      Press the space bar to play!\n"
+#. TRANSLATORS: Please keep this text wrapped to 40 characters. The font
+#. used in-game is lacking many glyphs, so please test it with your
+#. language and let me know if I need to add glyphs.
+#: chambercourt/game.py:185
+msgid "Game instructions go here.\n"
 msgstr ""
-"Les instructions du jeu se mettent ici.\n"
-"\n"
-"\n"
-"       (choisis avec les chiffres et\n"
-"          touches de déplacement)\n"
-"\n"
-"    Tape la barre éspace pour jouer!\n"
 
-#: chambercourt/game.py:240
+#: chambercourt/game.py:187
+msgid ""
+"    Z/X - Left/Right   '/? - Up/Down\n"
+"     or use the arrow keys to move\n"
+msgstr ""
+
+#: chambercourt/game.py:190
+msgid ""
+"        S/L - Save/load position\n"
+"           R - Restart level\n"
+"             Q - Quit game\n"
+"         F - toggle full screen\n"
+msgstr ""
+
+#: chambercourt/game.py:195
+msgid " (choose with movement keys and digits)\n"
+msgstr ""
+
+#: chambercourt/game.py:197
+msgid "      Press the space bar to play!\n"
+msgstr ""
+
+#: chambercourt/game.py:253
 msgid "cannot find asset `{}'"
 msgstr "fichier «{}» introuvable"
 
-#: chambercourt/game.py:560
+#: chambercourt/game.py:573
 msgid "Start level: {}/{}"
 msgstr "Niveau à commencer : {}/{}"
 
-#: chambercourt/game.py:701
+#: chambercourt/game.py:714
 msgid "Level {}:"
 msgstr "Niveau {} :"
 
-#: chambercourt/game.py:746
+#: chambercourt/game.py:759
 msgid "a directory or Zip file of levels to use"
 msgstr "un répertoire ou fichier Zip de niveaux à utiliser"
 
-#: chambercourt/game.py:752
+#: chambercourt/game.py:765
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr "%(prog)s {} de {}"
 
-#: chambercourt/game.py:801
+#: chambercourt/game.py:814
 msgid "Error reading levels: {}"
 msgstr "Erreur en chargeant les niveaux : {}"
 
-#: chambercourt/game.py:804
+#: chambercourt/game.py:817
 msgid "Could not find any levels"
 msgstr "Aucun niveau trouvé"
+
+#~ msgid ""
+#~ "Game instructions go here.\n"
+#~ "\n"
+#~ "\n"
+#~ " (choose with movement keys and digits)\n"
+#~ "\n"
+#~ "      Press the space bar to play!\n"
+#~ msgstr ""
+#~ "Les instructions du jeu se mettent ici.\n"
+#~ "\n"
+#~ "\n"
+#~ "       (choisis avec les chiffres et\n"
+#~ "          touches de déplacement)\n"
+#~ "\n"
+#~ "    Tape la barre éspace pour jouer!\n"

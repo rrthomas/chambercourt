@@ -178,14 +178,27 @@ class Game[Tile: StrEnum]:
             width of the screen, and contain three consecutive newlines to
             indicate the position of the level selector.
         """
+        # fmt: off
+        # TRANSLATORS: Please keep this text wrapped to 40 characters. The font
+        # used in-game is lacking many glyphs, so please test it with your
+        # language and let me know if I need to add glyphs.
         return _("""\
 Game instructions go here.
-
-
+""") + "\n" + _("""\
+    Z/X - Left/Right   '/? - Up/Down
+     or use the arrow keys to move
+""") + "\n" + _("""\
+        S/L - Save/load position
+           R - Restart level
+             Q - Quit game
+         F - toggle full screen
+""") + "\n\n" + _("""\
  (choose with movement keys and digits)
-
+""") + "\n" + _("""\
       Press the space bar to play!
-""")
+"""
+        # fmt: on
+        )
 
     screen_size = (640, 480)
     """The size of the game screen.
