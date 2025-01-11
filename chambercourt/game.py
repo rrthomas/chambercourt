@@ -551,7 +551,7 @@ Game instructions go here.
                         - title_image.get_width() * self.screen.window_scale
                     )
                     // 2,
-                    20 * self.screen.window_scale,
+                    12 * self.screen.window_scale,
                 ),
             )
             self.screen.print_screen((0, instructions_y), instructions, color="grey")
