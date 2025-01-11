@@ -90,7 +90,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           pip install cx_Freeze
-          convert chambercourt/app-icon.png app-icon.ico
+          convert chambercourt/levels/app-icon.png app-icon.ico
           cxfreeze bdist_msi
       - name: Upload the binary (Ubuntu and macOS)
         if: ${{ matrix.os != 'windows-latest' }}
