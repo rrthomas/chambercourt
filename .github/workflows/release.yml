@@ -63,18 +63,18 @@ jobs:
         run: npm install -g pyright
       - name: Install Python dependencies
         run: pip install tox build setuptools pygame i18nparse platformdirs pyscroll pytmx
-      - name: Install additional dependencies for binary builds
-        run: pip install pyinstaller
       - name: Build
         run: make dist
       - name: Build the executable (Ubuntu)
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: |
+          pip install pyinstaller
           PYTHONPATH=. pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --copy-metadata chambercourt --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }} --help
       - name: Build the executable (macOS)
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
         run: |
+          pip install pyinstaller
           ./make-macos-icns ./chambercourt/levels/Hero.png chambercourt.iconset
           pyi-makespec --windowed --name ChamberCourt --icon chambercourt.icns --copy-metadata chambercourt --add-data "chambercourt/*.ttf:chambercourt/" --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           export version=$(grep version pyproject.toml)
