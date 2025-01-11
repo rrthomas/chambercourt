@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-11 12:26+0000\n"
+"POT-Creation-Date: 2025-01-11 20:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,34 +22,40 @@ msgid "Play a game."
 msgstr ""
 
 #: chambercourt/game.py:181
-msgid "Game instructions go here."
+msgid ""
+"Game instructions go here.\n"
+"\n"
+"\n"
+" (choose with movement keys and digits)\n"
+"\n"
+"      Press the space bar to play!\n"
 msgstr ""
 
-#: chambercourt/game.py:233
+#: chambercourt/game.py:240
 msgid "cannot find asset `{}'"
 msgstr ""
 
-#: chambercourt/game.py:553
+#: chambercourt/game.py:560
 msgid "Start level: {}/{}"
 msgstr ""
 
-#: chambercourt/game.py:694
+#: chambercourt/game.py:701
 msgid "Level {}:"
 msgstr ""
 
-#: chambercourt/game.py:739
+#: chambercourt/game.py:746
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:745
+#: chambercourt/game.py:752
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr ""
 
-#: chambercourt/game.py:794
+#: chambercourt/game.py:801
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:797
+#: chambercourt/game.py:804
 msgid "Could not find any levels"
 msgstr ""

@@ -178,7 +178,7 @@ class Game[Tile: StrEnum]:
             width of the screen, and contain three consecutive newlines to
             indicate the position of the level selector.
         """
-        return _("""
+        return _("""\
 Game instructions go here.
 
 
