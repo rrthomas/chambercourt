@@ -85,7 +85,7 @@ jobs:
           brew install create-dmg
           mkdir dmg-folder
           mv dist/chambercourt.app dmg-folder/
-          create-dmg --volname "chambercourt ${{ github.ref_name }}" ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }}.dmg dmg-folder/
+          create-dmg --volname "ChamberCourt ${{ github.ref_name }}" ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }}.dmg dmg-folder/
       - name: Build the executable (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
