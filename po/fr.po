@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-01-11 12:26+0000\n"
-"PO-Revision-Date: 2025-01-05 17:00+0000\n"
+"PO-Revision-Date: 2025-01-11 17:09+0000\n"
 "Last-Translator: Reuben Thomas <rrt@sc3d.org>\n"
 "Language: French\n"
 "MIME-Version: 1.0\n"
@@ -23,16 +23,16 @@ msgid "Game instructions go here."
 msgstr "Les instructions du jeu se mettent ici."
 
 #: chambercourt/game.py:233
-msgid "cannot find asset `{}'"
-msgstr ""
+msgid "cannot find asset ‘{}’"
+msgstr "fichier «{}» introuvable"
 
 #: chambercourt/game.py:553
 msgid "Start level: {}/{}"
-msgstr "Niveau à commencer: {}/{}"
+msgstr "Niveau à commencer : {}/{}"
 
 #: chambercourt/game.py:694
 msgid "Level {}:"
-msgstr "Niveau {}:"
+msgstr "Niveau {} :"
 
 #: chambercourt/game.py:739
 msgid "a directory or Zip file of levels to use"
@@ -45,7 +45,7 @@ msgstr "%(prog)s {} de {}"
 
 #: chambercourt/game.py:794
 msgid "Error reading levels: {}"
-msgstr "Erreur en chargeant les niveaux: {}"
+msgstr "Erreur en chargeant les niveaux : {}"
 
 #: chambercourt/game.py:797
 msgid "Could not find any levels"
