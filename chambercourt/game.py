@@ -178,7 +178,14 @@ class Game[Tile: StrEnum]:
             width of the screen, and contain three consecutive newlines to
             indicate the position of the level selector.
         """
-        return _("Game instructions go here.")
+        return _("""
+Game instructions go here.
+
+
+ (choose with movement keys and digits)
+
+      Press the space bar to play!
+""")
 
     screen_size = (640, 480)
     """The size of the game screen.
@@ -527,7 +534,7 @@ class Game[Tile: StrEnum]:
         clear_keys()
         level = 0
         clock = pygame.time.Clock()
-        instructions_y = 14
+        instructions_y = 12  # FIXME: make this customizable
         start_level_y = (
             instructions_y
             + len(instructions.split("\n\n\n", maxsplit=1)[0].split("\n"))
@@ -547,7 +554,7 @@ class Game[Tile: StrEnum]:
                     20 * self.screen.window_scale,
                 ),
             )
-            self.screen.print_screen((0, 14), instructions, color="grey")
+            self.screen.print_screen((0, instructions_y), instructions, color="grey")
             self.screen.print_screen(
                 (0, start_level_y),
                 _("Start level: {}/{}").format(1 if level == 0 else level, self.levels),
