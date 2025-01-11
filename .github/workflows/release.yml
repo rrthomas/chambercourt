@@ -58,9 +58,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           nuget install Gettext.Tools -Version 0.22.4 -OutputDirectory c:\nuget;
-          Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin";
-          nuget install Magick.NET-Q16-AnyCPU -Version 14.3.0 -OutputDirectory c:\nuget;
-          Add-Content $env:GITHUB_PATH "C:\nuget\Magic.NET-Q16-AnyCPU.14.3.0\tools\bin"
+          Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin"
       - name: Install pyright
         run: npm install -g pyright
       - name: Install Python dependencies
@@ -89,8 +87,8 @@ jobs:
       - name: Build the executable (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          pip install cx_Freeze
-          convert chambercourt/levels/app-icon.png app-icon.ico
+          pip install cx_Freeze Pillow
+          python convert-image chambercourt/levels/app-icon.png app-icon.ico
           cxfreeze bdist_msi
           mv dist/*.msi dist/chambercourt-win64.msi
       - name: Upload the binary (Ubuntu and macOS)
