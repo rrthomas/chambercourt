@@ -6,6 +6,7 @@ Released under the GPL version 3, or (at your option) any later version.
 
 import argparse
 import atexit
+import copy
 import gettext
 import importlib
 import importlib.metadata
@@ -145,6 +146,8 @@ class Game[Tile: StrEnum]:
         self.level_width: int
         self.level_height: int
         self.block_pixels: int
+        self.tmx_data: dict[Path, pytmx.TiledMap]
+        self.map_blocks: dict[Path, pytmx.TiledTileLayer]
         self._map_blocks: pytmx.TiledTileLayer
         self._gids: dict[Tile, int]
         self._map_layer: pyscroll.BufferedRenderer
@@ -260,7 +263,9 @@ class Game[Tile: StrEnum]:
         Returns:
             Callable[[Rect, int], TiledElement]: _description_
         """
-        return pygame_image_loader(str(self.find_asset(Path(filename).name)), colorkey, **kwargs)
+        return pygame_image_loader(
+            str(self.find_asset(Path(filename).name)), colorkey, **kwargs
+        )
 
     def restart_level(self) -> None:
         """Restart the current level.
@@ -271,11 +276,9 @@ class Game[Tile: StrEnum]:
         It loads the level, and sets the game window size to fit.
         """
         self.dead = False
-        tmx_data = pytmx.TiledMap(
-            str(self.levels_files[self.level - 1]), image_loader=self.image_loader
-        )
+        tmx_data = self.tmx_data[self.levels_files[self.level - 1]]
         self.map_data = pyscroll.data.TiledMapData(tmx_data)
-        self._map_blocks = self.map_data.tmx.layers[0].data
+        self.set_map(copy.deepcopy(self.map_blocks[self.levels_files[self.level - 1]]))
         (self.level_width, self.level_height) = self.map_data.map_size
         if self.map_data.tile_size[0] != self.map_data.tile_size[1]:
             raise Exception(_("map tiles must be square"))
@@ -365,6 +368,15 @@ class Game[Tile: StrEnum]:
         self._set(pos, self.empty_tile)
         self._set(pos, tile)
 
+    def set_map(self, map_blocks: pytmx.TiledTileLayer) -> None:
+        """Set the current map.
+
+        Args:
+            map_blocks (pytmx.TiledTileLayer): the tile data to use.
+        """
+        self._map_blocks = map_blocks
+        self.map_data.tmx.layers[0].data = self._map_blocks
+
     def save_position(self) -> None:
         """Save the current position."""
         self.set(self.hero.position, self.hero_tile)
@@ -379,8 +391,7 @@ class Game[Tile: StrEnum]:
         """
         if SAVED_POSITION_FILE.exists():
             with open(SAVED_POSITION_FILE, "rb") as fh:
-                self._map_blocks = pickle.load(fh)
-            self.map_data.tmx.layers[0].data = self._map_blocks
+                self.set_map(pickle.load(fh))
             self.init_renderer()
             self.init_physics()
 
@@ -722,37 +733,11 @@ class Game[Tile: StrEnum]:
             warnings.showwarning = simple_warning(parser.prog)
             args = parser.parse_args(argv)
 
-            app_path = Path(path)
-            levels_path = Path(args.levels or app_path / "levels")
+            self.app_path = Path(path)
+            self.levels_path = Path(args.levels or self.app_path / "levels")
 
-            # Load levels
-            try:
-                real_levels_path: Path
-                if zipfile.is_zipfile(levels_path):
-                    tmpdir = TemporaryDirectory()
-                    real_levels_path = Path(tmpdir.name)
-                    with zipfile.ZipFile(levels_path) as z:
-                        z.extractall(real_levels_path)
-                    atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
-                else:
-                    real_levels_path = Path(levels_path)
-                self.levels_files = sorted(
-                    [
-                        item
-                        for item in real_levels_path.iterdir()
-                        if (not str(item.name).startswith("."))
-                        and item.suffix == ".tmx"
-                    ]
-                )
-            except OSError as err:
-                die(_("Error reading levels: {}").format(err.strerror))
-            self.levels = len(self.levels_files)
-            if self.levels == 0:
-                die(_("Could not find any levels"))
-
+            # Initialize pygame
             pygame.init()
-            self.app_path = app_path
-            self.levels_path = levels_path
             self.load_assets()
             pygame.display.set_icon(self.app_icon)
             pygame.mouse.set_visible(False)
@@ -770,6 +755,41 @@ class Game[Tile: StrEnum]:
             self.die_sound = pygame.mixer.Sound(str(self.find_asset("Die.wav")))
             self.die_sound.set_volume(DEFAULT_VOLUME)
 
+            # Load levels
+            try:
+                real_levels_path: Path
+                if zipfile.is_zipfile(self.levels_path):
+                    tmpdir = TemporaryDirectory()
+                    real_levels_path = Path(tmpdir.name)
+                    with zipfile.ZipFile(self.levels_path) as z:
+                        z.extractall(real_levels_path)
+                    atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
+                else:
+                    real_levels_path = Path(self.levels_path)
+                self.levels_files = sorted(
+                    [
+                        item
+                        for item in real_levels_path.iterdir()
+                        if (not str(item.name).startswith("."))
+                        and item.suffix == ".tmx"
+                    ]
+                )
+            except OSError as err:
+                die(_("Error reading levels: {}").format(err.strerror))
+            self.levels = len(self.levels_files)
+            if self.levels == 0:
+                die(_("Could not find any levels"))
+            self.tmx_data = {}
+            self.map_blocks = {}
+            for level in self.levels_files:
+                self.tmx_data[level] = pytmx.TiledMap(
+                    str(level), image_loader=self.image_loader
+                )
+                self.map_blocks[level] = copy.deepcopy(
+                    self.tmx_data[level].layers[0].data
+                )
+
+        # Main loop
         try:
             while True:
                 level = self.title_screen(
