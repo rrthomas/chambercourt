@@ -320,6 +320,7 @@ Game instructions go here.
 
     def show_screen(self) -> None:
         """Show the current frame, and clear the rendering buffer."""
+        self.surface.blit(self.scale_surface(self.game_surface), self.window_pos)
         pygame.display.flip()
         self.reinit_screen()
         self.fade_background()
@@ -608,7 +609,6 @@ Game instructions go here.
             self.game_to_screen((int(self.hero.position.x), int(self.hero.position.y))),
         )
         self.show_status()
-        self.surface.blit(self.scale_surface(self.game_surface), self.window_pos)
         self.show_screen()
         pygame.time.wait(1000)
         self.dead = False
@@ -633,9 +633,6 @@ Game instructions go here.
         for x in range(self.level_width):
             for y in range(self.level_height):
                 self.game_surface.blit(sprite, self.game_to_screen((x, y)))
-        self.surface.blit(
-            self.scale_surface(self.game_surface), self.window_pos
-        )
         self.show_screen()
         pygame.time.wait(3000)
 
@@ -655,10 +652,7 @@ Game instructions go here.
             self.surface.blit(
                 self.scale_surface(title_image),
                 (
-                    (
-                        self.screen_size[0]
-                        - title_image.get_width() * self.window_scale
-                    )
+                    (self.screen_size[0] - title_image.get_width() * self.window_scale)
                     // 2,
                     12 * self.window_scale,
                 ),
@@ -717,9 +711,6 @@ Game instructions go here.
         while not self.quit and self.level <= self.levels:
             self.start_level()
             self.show_status()
-            self.surface.blit(
-                self.scale_surface(self.game_surface), self.window_pos
-            )
             self.show_screen()
             while not self.quit and not self.finished():
                 self.load_position()
@@ -746,9 +737,6 @@ Game instructions go here.
                         self.do_physics()
                     self.draw()
                     self.show_status()
-                    self.surface.blit(
-                        self.scale_surface(self.game_surface), self.window_pos
-                    )
                     self.show_screen()
                     subframe = (subframe + 1) % self.subframes
                     if subframe == 0:
