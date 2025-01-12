@@ -222,7 +222,7 @@ Game instructions go here.
     text_colour = Color(255, 255, 255)
     """The default text colour."""
 
-    default_background_colour = Color(0, 0, 255)
+    default_background_colour = Color(32, 32, 32)
     """The background colour of the screen."""
 
     font_name = "acorn-mode-1.ttf"
