@@ -130,8 +130,6 @@ class Game[Tile: StrEnum]:
         self.levels: int
         self.levels_files: list[Path]
         self.hero_image: pygame.Surface
-        self.die_image: pygame.Surface
-        self.die_sound: pygame.mixer.Sound
         self.app_icon: pygame.Surface
         self.title_image: pygame.Surface
         self.window_pixel_width: int
@@ -141,7 +139,6 @@ class Game[Tile: StrEnum]:
         self.window_pos = (0, 0)
         self.game_surface: pygame.Surface
         self.quit = False
-        self.dead = False
         self.level = 1
         self.level_width: int
         self.level_height: int
@@ -362,7 +359,6 @@ Game instructions go here.
         self.app_icon = pygame.image.load(self.find_asset("app-icon.png"))
         self.title_image = pygame.image.load(self.find_asset("title.png"))
         self.hero_image = pygame.image.load(self.find_asset("Hero.png"))
-        self.die_image = pygame.image.load(self.find_asset("Die.png"))
 
     def init_renderer(self) -> None:
         """Set up the `pyscroll.BufferedRenderer` and its camera (group)."""
@@ -397,7 +393,6 @@ Game instructions go here.
 
         It loads the level, and sets the game window size to fit.
         """
-        self.dead = False
         level_file = self.levels_files[self.level - 1]
         self.load_level(level_file)
         (self.level_width, self.level_height) = self.map_data.map_size
@@ -601,18 +596,6 @@ Game instructions go here.
         if pressed[pygame.K_q]:
             self.quit = True
 
-    def die(self) -> None:
-        """Handle the death of the hero."""
-        self.die_sound.play()
-        self.game_surface.blit(
-            self.die_image,
-            self.game_to_screen((int(self.hero.position.x), int(self.hero.position.y))),
-        )
-        self.show_status()
-        self.show_screen()
-        pygame.time.wait(1000)
-        self.dead = False
-
     def game_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
         """Convert game grid to screen coordinates.
 
@@ -715,7 +698,7 @@ Game instructions go here.
             while not self.quit and not self.finished():
                 self.load_position()
                 subframe = 0
-                while not self.quit and not self.dead and not self.finished():
+                while not self.quit and not self.finished():
                     clock.tick(self.frames_per_second)
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
@@ -727,6 +710,8 @@ Game instructions go here.
                             self._joysticks[joy.get_instance_id()] = joy
                         elif event.type == pygame.JOYDEVICEREMOVED:
                             del self._joysticks[event.instance_id]
+
+                    # FIXME: Move this block into game-specific method.
                     if self.hero.velocity == Vector2(0, 0):
                         self.handle_input()
                         if self.hero.velocity != Vector2(0, 0):
@@ -735,15 +720,14 @@ Game instructions go here.
                     self._group.update(1 / self.subframes)
                     if subframe == self.subframes - 1:
                         self.do_physics()
-                    self.draw()
-                    self.show_status()
-                    self.show_screen()
                     subframe = (subframe + 1) % self.subframes
                     if subframe == 0:
                         self.hero.velocity = Vector2(0, 0)
+
+                    self.draw()
+                    self.show_status()
+                    self.show_screen()
                 self.stop_play()
-                if self.dead:
-                    self.die()
             if self.finished():
                 self.level += 1
         if self.level > self.levels:
@@ -866,8 +850,6 @@ Game instructions go here.
             pygame.joystick.init()
             pygame.display.set_caption(metadata["Name"])
             self.init_screen()
-            self.die_sound = pygame.mixer.Sound(str(self.find_asset("Die.wav")))
-            self.die_sound.set_volume(DEFAULT_VOLUME)
 
             # Load levels
             try:
