@@ -35,7 +35,7 @@ packages = ["chambercourt"]
 chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo", "py.typed"]
 
 [tool.pyright]
-ignore = ["/usr/**", "chambercourt/ptext.py"]
+ignore = ["chambercourt/ptext.py"]
 
 [tool.ruff.lint]
 exclude = ["ptext.py"]
