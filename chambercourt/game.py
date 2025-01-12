@@ -234,6 +234,9 @@ Game instructions go here.
     The font is scaled by `window_scale` and then by this factor.
     """
 
+    instructions_y = 12
+    """The text y coordinate at which the instructions are printed."""
+
     frames_per_second = 60
     """Frames per second for the game main loop."""
 
@@ -641,9 +644,8 @@ Game instructions go here.
         clear_keys()
         level = 0
         clock = pygame.time.Clock()
-        instructions_y = 12  # FIXME: make this customizable
         start_level_y = (
-            instructions_y
+            self.instructions_y
             + len(instructions.split("\n\n\n", maxsplit=1)[0].split("\n"))
             + 1
         )
@@ -661,7 +663,7 @@ Game instructions go here.
                     12 * self.window_scale,
                 ),
             )
-            self.print_screen((0, instructions_y), instructions, color="grey")
+            self.print_screen((0, self.instructions_y), instructions, color="grey")
             self.print_screen(
                 (0, start_level_y),
                 _("Start level: {}/{}").format(1 if level == 0 else level, self.levels),
