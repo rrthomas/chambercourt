@@ -27,7 +27,6 @@ from platformdirs import user_data_dir
 
 from .event import handle_global_keys, handle_quit_event, quit_game
 from .langdetect import language_code
-from .screen import Screen
 from .warnings_util import die, simple_warning
 
 
@@ -40,6 +39,8 @@ with warnings.catch_warnings():
     import pytmx  # type: ignore
     from pygame import Color, Rect, Vector2
     from pytmx.util_pygame import pygame_image_loader
+
+    from . import ptext
 
 
 locale.setlocale(locale.LC_ALL, "")
@@ -126,7 +127,6 @@ class Game[Tile: StrEnum]:
         self.empty_tile = empty_tile
         self.default_tile = default_tile
 
-        self.screen: Screen
         self.levels: int
         self.levels_files: list[Path]
         self.hero_image: pygame.Surface
@@ -219,8 +219,14 @@ Game instructions go here.
     The window is scaled by this factor before being blitted to the screen.
     """
 
-    background_colour = Color(0, 0, 255)
+    text_colour = Color(255, 255, 255)
+    """The default text colour."""
+
+    default_background_colour = Color(0, 0, 255)
     """The background colour of the screen."""
+
+    font_name = "acorn-mode-1.ttf"
+    """The monospaced font to use for text."""
 
     font_scale = 1
     """The scale factor applied to the font.
@@ -252,13 +258,103 @@ Game instructions go here.
                 return fallback_asset
         raise OSError(_("cannot find asset `{}'").format(asset_file))
 
-    def load_assets(self) -> None:
-        """Load game assets.
+    def init_screen(self) -> None:
+        """Initialise the screen."""
+        self.font_pixels = 8 * self.window_scale * self.font_scale
+        self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
+        self.reinit_screen()
+        # Force ptext to cache the font
+        self.print_screen((0, 0), "")
+
+    def reinit_screen(self) -> None:
+        """Reinitialise the screen.
+
+        Used when transitioning between instructions and main game screens.
+        """
+        self.background_colour = self.default_background_colour
+        self.surface.fill(self.background_colour)
+
+    def flash_background(self) -> None:
+        """Set the background colour to be lighter.
+
+        In combination with `Screen.fade_background()`, this causes the
+        screen to flash, indicating that some action such as saving the
+        player’s position has been accomplished.
+        """
+        self.background_colour = Color(
+            min(255, self.background_colour.r + 160),
+            min(255, self.background_colour.g + 160),
+            min(255, self.background_colour.b + 160),
+        )
+
+    def fade_background(self) -> None:
+        """Fade the background.
+
+        Called every frame to return the background colour to the default
+        over a period of several frames.
+        """
+        self.background_colour = Color(
+            max(self.background_colour.r - 10, self.background_colour.r),
+            max(self.background_colour.g - 10, self.background_colour.g),
+            max(self.background_colour.b - 10, self.background_colour.b),
+        )
+
+    def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
+        """Scales the given surface by `self.window_scale`.
 
         Args:
-            path (Path): path to assets
-            levels_path (Path): path to levels directory
+            surface (pygame.Surface): surface to scale
+
+        Returns:
+            pygame.Surface: a new surface, that is `surface` scaled by
+            `self.window_scale`.
         """
+        scaled_width = surface.get_width() * self.window_scale
+        scaled_height = surface.get_height() * self.window_scale
+        scaled_surface = pygame.Surface((scaled_width, scaled_height))
+        pygame.transform.scale(surface, (scaled_width, scaled_height), scaled_surface)
+        return scaled_surface
+
+    def show_screen(self) -> None:
+        """Show the current frame, and clear the rendering buffer."""
+        pygame.display.flip()
+        self.reinit_screen()
+        self.fade_background()
+
+    def text_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
+        """Convert character cell coordinates to screen coordinates.
+
+        Args:
+            pos (tuple[int, int]): an `(x, y)` pair of character cell
+            coordinates
+
+        Returns:
+            tuple[int, int]: the corresponding `(x, y)` pair of pixel
+            coordinates
+        """
+        return (pos[0] * self.font_pixels, pos[1] * self.font_pixels)
+
+    def print_screen(self, pos: tuple[int, int], msg: str, **kwargs) -> None:
+        """Print text on the screen at the given text character coordinates.
+
+        A monospaced font is assumed.
+
+        Args:
+            pos (tuple[int, int]): an `(x, y)` pair of character cell coordinates
+            msg (str): the text to print
+            kwargs: keyword arguments to `ptext.draw`
+        """
+        ptext.draw(  # type: ignore[no-untyped-call]
+            msg,
+            self.text_to_screen(pos),
+            fontname=self.font_path,
+            fontsize=self.font_pixels,
+            **kwargs,
+        )
+
+    def load_assets(self) -> None:
+        """Load game assets."""
+        self.font_path = self.find_asset(self.font_name)
         self.app_icon = pygame.image.load(self.find_asset("app-icon.png"))
         self.title_image = pygame.image.load(self.find_asset("title.png"))
         self.hero_image = pygame.image.load(self.find_asset("Hero.png"))
@@ -311,16 +407,16 @@ Game instructions go here.
             self.window_size[1],
         )
         (self.window_scaled_width, self.window_scaled_height) = (
-            self.window_pixel_width * self.screen.window_scale,
-            self.window_pixel_height * self.screen.window_scale,
+            self.window_pixel_width * self.window_scale,
+            self.window_pixel_height * self.window_scale,
         )
         self.game_surface = pygame.Surface(
             (self.window_pixel_width, self.window_pixel_height)
         )
         self.window_pos = (
-            (self.screen.surface.get_width() - self.window_scaled_width) // 2,
-            (self.screen.surface.get_height() - self.window_scaled_height) // 2
-            + 4 * self.screen.window_scale,
+            (self.surface.get_width() - self.window_scaled_width) // 2,
+            (self.surface.get_height() - self.window_scaled_height) // 2
+            + 4 * self.window_scale,
         )
 
         # Dict mapping tileset GIDs to map gids
@@ -490,13 +586,13 @@ Game instructions go here.
         elif dy != 0 and self.can_move(Vector2(0, dy)):
             self.hero.velocity = Vector2(0, dy)
         if pressed[pygame.K_l]:
-            self.screen.flash_background()
+            self.flash_background()
             self.load_position()
         elif pressed[pygame.K_s]:
-            self.screen.flash_background()
+            self.flash_background()
             self.save_position()
         if pressed[pygame.K_r]:
-            self.screen.flash_background()
+            self.flash_background()
             self.restart_level()
         if pressed[pygame.K_q]:
             self.quit = True
@@ -509,10 +605,8 @@ Game instructions go here.
             self.game_to_screen((int(self.hero.position.x), int(self.hero.position.y))),
         )
         self.show_status()
-        self.screen.surface.blit(
-            self.screen.scale_surface(self.game_surface), self.window_pos
-        )
-        self.screen.show_screen()
+        self.surface.blit(self.scale_surface(self.game_surface), self.window_pos)
+        self.show_screen()
         pygame.time.wait(1000)
         self.dead = False
 
@@ -536,10 +630,10 @@ Game instructions go here.
         for x in range(self.level_width):
             for y in range(self.level_height):
                 self.game_surface.blit(sprite, self.game_to_screen((x, y)))
-        self.screen.surface.blit(
-            self.screen.scale_surface(self.game_surface), self.window_pos
+        self.surface.blit(
+            self.scale_surface(self.game_surface), self.window_pos
         )
-        self.screen.show_screen()
+        self.show_screen()
         pygame.time.wait(3000)
 
     def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
@@ -555,23 +649,23 @@ Game instructions go here.
         )
         play = False
         while not play:
-            self.screen.reinit_screen()
-            self.screen.surface.blit(
-                self.screen.scale_surface(title_image),
+            self.reinit_screen()
+            self.surface.blit(
+                self.scale_surface(title_image),
                 (
                     (
                         self.screen_size[0]
-                        - title_image.get_width() * self.screen.window_scale
+                        - title_image.get_width() * self.window_scale
                     )
                     // 2,
-                    12 * self.screen.window_scale,
+                    12 * self.window_scale,
                 ),
             )
-            self.screen.print_screen((0, instructions_y), instructions, color="grey")
-            self.screen.print_screen(
+            self.print_screen((0, instructions_y), instructions, color="grey")
+            self.print_screen(
                 (0, start_level_y),
                 _("Start level: {}/{}").format(1 if level == 0 else level, self.levels),
-                width=self.screen.surface.get_width(),
+                width=self.surface.get_width(),
                 align="center",
             )
             pygame.display.flip()
@@ -621,10 +715,10 @@ Game instructions go here.
         while not self.quit and self.level <= self.levels:
             self.start_level()
             self.show_status()
-            self.screen.surface.blit(
-                self.screen.scale_surface(self.game_surface), self.window_pos
+            self.surface.blit(
+                self.scale_surface(self.game_surface), self.window_pos
             )
-            self.screen.show_screen()
+            self.show_screen()
             while not self.quit and not self.finished():
                 self.load_position()
                 subframe = 0
@@ -650,10 +744,10 @@ Game instructions go here.
                         self.do_physics()
                     self.draw()
                     self.show_status()
-                    self.screen.surface.blit(
-                        self.screen.scale_surface(self.game_surface), self.window_pos
+                    self.surface.blit(
+                        self.scale_surface(self.game_surface), self.window_pos
                     )
-                    self.screen.show_screen()
+                    self.show_screen()
                     subframe = (subframe + 1) % self.subframes
                     if subframe == 0:
                         self.hero.velocity = Vector2(0, 0)
@@ -709,12 +803,12 @@ Game instructions go here.
         This method prints the current level, and should be overridden by
         game classes to print extra game-specific information.
         """
-        self.screen.print_screen(
+        self.print_screen(
             (0, 0),
             _("Level {}:").format(self.level)
             + " "
             + self.map_data.tmx.properties["Title"],
-            width=self.screen.surface.get_width(),
+            width=self.surface.get_width(),
             align="center",
             color="grey",
         )
@@ -781,13 +875,7 @@ Game instructions go here.
             pygame.key.set_repeat()
             pygame.joystick.init()
             pygame.display.set_caption(metadata["Name"])
-            self.screen = Screen(
-                self.screen_size,
-                str(path / "acorn-mode-1.ttf"),
-                self.window_scale,
-                self.font_scale,
-                self.background_colour,
-            )
+            self.init_screen()
             self.die_sound = pygame.mixer.Sound(str(self.find_asset("Die.wav")))
             self.die_sound.set_volume(DEFAULT_VOLUME)
 
