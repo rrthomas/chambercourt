@@ -38,7 +38,7 @@ with warnings.catch_warnings():
     import pygame
     import pyscroll  # type: ignore
     import pytmx  # type: ignore
-    from pygame import Rect, Vector2
+    from pygame import Color, Rect, Vector2
     from pytmx.util_pygame import pygame_image_loader
 
 
@@ -219,7 +219,7 @@ Game instructions go here.
     The window is scaled by this factor before being blitted to the screen.
     """
 
-    background_colour = (0, 0, 255)
+    background_colour = Color(0, 0, 255)
     """The background colour of the screen."""
 
     font_scale = 1

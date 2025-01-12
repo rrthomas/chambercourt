@@ -14,6 +14,7 @@ os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import pygame
+    from pygame import Color
 
     from . import ptext
 
@@ -48,10 +49,11 @@ class Screen:
               `window_scale`.
 
             background_colour (tuple[int, int, int], optional): the
-              background colour of the screen. Defaults to `(0, 0, 255)`.
+              background colour of the screen. Defaults to `Color(0, 0,
+              255)`.
         """
         self.window_scale = window_scale
-        self.text_colour = (255, 255, 255)
+        self.text_colour = Color(255, 255, 255)
         self.background_colour = background_colour
         self.default_background_colour = background_colour
         self.font_pixels = 8 * self.window_scale * font_scale
@@ -75,10 +77,10 @@ class Screen:
         screen to flash, indicating that some action such as saving the
         player’s position has been accomplished.
         """
-        self.background_colour = (
-            min(255, self.default_background_colour[0] + 160),
-            min(255, self.default_background_colour[1] + 160),
-            min(255, self.default_background_colour[2] + 160),
+        self.background_colour = Color(
+            min(255, self.default_background_colour.r + 160),
+            min(255, self.default_background_colour.g + 160),
+            min(255, self.default_background_colour.b + 160),
         )
 
     def fade_background(self) -> None:
@@ -87,10 +89,10 @@ class Screen:
         Called every frame to return the background colour to the default
         over a period of several frames.
         """
-        self.background_colour = (
-            max(self.background_colour[0] - 10, self.default_background_colour[0]),
-            max(self.background_colour[1] - 10, self.default_background_colour[1]),
-            max(self.background_colour[2] - 10, self.default_background_colour[2]),
+        self.background_colour = Color(
+            max(self.background_colour.r - 10, self.default_background_colour.r),
+            max(self.background_colour.g - 10, self.default_background_colour.g),
+            max(self.background_colour.b - 10, self.default_background_colour.b),
         )
 
     def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
