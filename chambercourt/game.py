@@ -1,6 +1,6 @@
 """ChamberCourt: Main game class.
 
-© Reuben Thomas <rrt@sc3d.org> 2024
+© Reuben Thomas <rrt@sc3d.org> 2024-2025
 Released under the GPL version 3, or (at your option) any later version.
 """
 
@@ -237,7 +237,7 @@ Game instructions go here.
     frames_per_second = 60
     """Frames per second for the game main loop."""
 
-    subframes = 8
+    frames = 8
     """Number of frames over which to animate each hero move."""
 
     def find_asset(self, asset_file: str) -> Path:
@@ -557,7 +557,7 @@ Game instructions go here.
                     dy = 1
         return (dx, dy)
 
-    def handle_input(self) -> None:
+    def handle_input(self) -> tuple[int, int]:
         """Handle input during the game.
 
         This handles all supported input devices, and both in-game controls
@@ -577,10 +577,6 @@ Game instructions go here.
         (jdx, jdy) = self.handle_joysticks()
         if (jdx, jdy) != (0, 0):
             (dx, dy) = (jdx, jdy)
-        if dx != 0 and self.can_move(Vector2(dx, 0)):
-            self.hero.velocity = Vector2(dx, 0)
-        elif dy != 0 and self.can_move(Vector2(0, dy)):
-            self.hero.velocity = Vector2(0, dy)
         if pressed[pygame.K_l]:
             self.flash_background()
             self.load_position()
@@ -592,6 +588,7 @@ Game instructions go here.
             self.restart_level()
         if pressed[pygame.K_q]:
             self.quit = True
+        return (dx, dy)
 
     def game_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
         """Convert game grid to screen coordinates.
@@ -676,8 +673,14 @@ Game instructions go here.
     def end_game(self) -> None:
         """Do any game-specific tear-down when the game ends."""
 
+    def start_play(self) -> None:
+        """Do any game-specific set-up when play starts."""
+
     def stop_play(self) -> None:
         """Do any game-specific tear-down when play is interrupted."""
+
+    def do_play(self) -> None:
+        """Game-specific main loop logic."""
 
     def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
@@ -690,11 +693,13 @@ Game instructions go here.
         clock = pygame.time.Clock()
         while not self.quit and self.level <= self.levels:
             self.start_level()
-            self.show_status()
-            self.show_screen()
             while not self.quit and not self.finished():
                 self.load_position()
-                subframe = 0
+                frame = 0
+                moving = False
+                self.hero.velocity = Vector2(0, 0)
+                self._group.update(0)
+                self.start_play()
                 while not self.quit and not self.finished():
                     clock.tick(self.frames_per_second)
                     for event in pygame.event.get():
@@ -707,20 +712,24 @@ Game instructions go here.
                             self._joysticks[joy.get_instance_id()] = joy
                         elif event.type == pygame.JOYDEVICEREMOVED:
                             del self._joysticks[event.instance_id]
-
-                    # FIXME: Move this block into game-specific method.
-                    if self.hero.velocity == Vector2(0, 0):
-                        self.handle_input()
-                        if self.hero.velocity != Vector2(0, 0):
-                            self.do_move()
-                            subframe = 0
-                    self._group.update(1 / self.subframes)
-                    if subframe == self.subframes - 1:
-                        self.do_physics()
-                    subframe = (subframe + 1) % self.subframes
-                    if subframe == 0:
+                    if frame % self.frames == 0:
                         self.hero.velocity = Vector2(0, 0)
-
+                        moving = False
+                    (dx, dy) = self.handle_input()
+                    if not moving and (dx, dy) != (0, 0):
+                        allowed_move = (0, 0)
+                        if dx != 0 and self.can_move(Vector2(dx, 0)):
+                            allowed_move = (dx, 0)
+                        elif dy != 0 and self.can_move(Vector2(0, dy)):
+                            allowed_move = (0, dy)
+                        if allowed_move != (0, 0):
+                            self.hero.velocity = Vector2(allowed_move)
+                            frame = 0
+                            moving = True
+                    if frame == 0:
+                        self.do_play()
+                    frame = (frame + 1) % self.frames
+                    self._group.update(1 / self.frames)
                     self.draw()
                     self.show_status()
                     self.show_screen()
@@ -747,9 +756,6 @@ Game instructions go here.
                     self.hero.position = Vector2(x, y)
                     self.set(self.hero.position, self.empty_tile)
 
-    def do_physics(self) -> None:
-        """Implement the game physics."""
-
     def can_move(self, velocity: Vector2) -> bool:
         """Determine whether the hero can move by the given displacement.
 
@@ -757,16 +763,15 @@ Game instructions go here.
             velocity (Vector2): the displacement unit vector
 
         Returns:
-            bool: `True` if the player can move in that direction, or `False`
-              otherwise.
+            bool: `True` if the player can move in that direction, or
+              `False` otherwise.
+
+        The default rule is that the player may not move on to
+        `default_tile`.
         """
         newpos = self.hero.position + velocity
-        return (0 <= newpos.x < self.level_width) and (
-            0 <= newpos.y < self.level_height
-        )
-
-    def do_move(self) -> None:
-        """Update the game state when the player moves."""
+        block = self.get(newpos)
+        return block != self.default_tile
 
     def show_status(self) -> None:
         """Update the status display.
