@@ -266,13 +266,17 @@ Game instructions go here.
         # Force ptext to cache the font
         self.print_screen((0, 0), "")
 
+    def clear_screen(self) -> None:
+        """Clear the screen."""
+        self.surface.fill(self.background_colour)
+
     def reinit_screen(self) -> None:
         """Reinitialise the screen.
 
         Used when transitioning between instructions and main game screens.
         """
         self.background_colour = self.default_background_colour
-        self.surface.fill(self.background_colour)
+        self.clear_screen()
 
     def flash_background(self) -> None:
         """Set the background colour to be lighter.
@@ -294,9 +298,9 @@ Game instructions go here.
         over a period of several frames.
         """
         self.background_colour = Color(
-            max(self.background_colour.r - 10, self.background_colour.r),
-            max(self.background_colour.g - 10, self.background_colour.g),
-            max(self.background_colour.b - 10, self.background_colour.b),
+            max(self.background_colour.r - 10, self.default_background_colour.r),
+            max(self.background_colour.g - 10, self.default_background_colour.g),
+            max(self.background_colour.b - 10, self.default_background_colour.b),
         )
 
     def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
@@ -319,7 +323,7 @@ Game instructions go here.
         """Show the current frame, and clear the rendering buffer."""
         self.surface.blit(self.scale_surface(self.game_surface), self.window_pos)
         pygame.display.flip()
-        self.reinit_screen()
+        self.clear_screen()
         self.fade_background()
 
     def text_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
