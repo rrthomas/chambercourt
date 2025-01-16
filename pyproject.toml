@@ -36,6 +36,7 @@ chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/
 
 [tool.pyright]
 ignore = ["chambercourt/ptext.py"]
+include = ["chambercourt"]
 
 [tool.ruff.lint]
 exclude = ["ptext.py"]
