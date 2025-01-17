@@ -182,7 +182,7 @@ class Game[Tile: StrEnum]:
         # players.
         return """\
 Game instructions go here.
-""" + "\n"
+"""
         # fmt: on
 
     screen_size = (640, 480)
