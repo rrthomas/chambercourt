@@ -182,21 +182,8 @@ class Game[Tile: StrEnum]:
         # players.
         return """\
 Game instructions go here.
-""" + "\n" + _("""\
-    Z/X - Left/Right   '/? - Up/Down
-     or use the arrow keys to move
-""") + "\n" + _("""\
-        S/L - Save/load position
-           R - Restart level
-             Q - Quit game
-         F - toggle full screen
-""") + "\n\n" + _("""\
- (choose with movement keys and digits)
-""") + "\n" + _("""\
-      Press the space bar to play!
-"""
+""" + "\n"
         # fmt: on
-        )
 
     screen_size = (640, 480)
     """The size of the game screen.
@@ -895,7 +882,28 @@ Game instructions go here.
             while True:
                 level = self.title_screen(
                     self.title_image.convert(),
-                    self.instructions(),
+                    # TRANSLATORS: Please keep this text wrapped to 40 characters.
+                    self.instructions()
+                    + "\n"
+                    + _("""\
+    Z/X - Left/Right   '/? - Up/Down
+     or use the arrow keys to move
+""")
+                    + "\n"
+                    + _("""\
+        S/L - Save/load position
+           R - Restart level
+             Q - Quit game
+         F - toggle full screen
+""")
+                    + "\n\n"
+                    + _("""\
+ (choose with movement keys and digits)
+""")
+                    + "\n"
+                    + _("""\
+      Press the space bar to play!
+"""),
                 )
                 self.run(level)
         except KeyboardInterrupt:
