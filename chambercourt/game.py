@@ -162,7 +162,8 @@ class Game[Tile: StrEnum]:
         Returns:
             str: description of the game
         """
-        return _("Play a game.")
+        # Not translated as it is for programmers, not players.
+        return "Play a game."
 
     @staticmethod
     def instructions() -> str:
@@ -177,9 +178,11 @@ class Game[Tile: StrEnum]:
         # TRANSLATORS: Please keep this text wrapped to 40 characters. The font
         # used in-game is lacking many glyphs, so please test it with your
         # language and let me know if I need to add glyphs.
-        return _("""\
+        # The next string is not translated as it is for programmers, not
+        # players.
+        return """\
 Game instructions go here.
-""") + "\n" + _("""\
+""" + "\n" + _("""\
     Z/X - Left/Right   '/? - Up/Down
      or use the arrow keys to move
 """) + "\n" + _("""\
