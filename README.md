@@ -20,14 +20,20 @@ College, because I wrote this package first while resurrecting a game,
 [WinColl](https://github.com/rrthomas/wincoll), named after the school.
 
 
-## Installation and use
+## Installation
 
-* [API documentation](https://rrthomas.github.io/chambercourt)
- 
 Install with `pip`: `pip install chambercourt`.
 
-A demonstration front-end is available, called `chambercourt`. You can run
-it directly from a Git checkout with `PYTHONPATH=. python -m chambercourt`.
+
+## Creating games with ChamberCourt
+
+The following documentation is available:
+
+* [API documentation](https://rrthomas.github.io/chambercourt)
+* [Cookbook](Cookbook.md)
+* Demo game: a demonstration game is available, called `chambercourt`. You
+  can run it directly from a Git checkout with
+  `PYTHONPATH=. python -m chambercourt`.
 
 
 ## Creating and editing levels
