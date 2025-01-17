@@ -541,13 +541,6 @@ Game instructions go here.
         Returns:
             tuple[int, int]: the desired unit velocity
         """
-        for event in pygame.event.get(pygame.JOYDEVICEADDED):
-            joy = pygame.joystick.Joystick(event.device_index)
-            self._joysticks[joy.get_instance_id()] = joy
-
-        for event in pygame.event.get(pygame.JOYDEVICEREMOVED):
-            del self._joysticks[event.instance_id]
-
         dx, dy = (0, 0)
         for joystick in self._joysticks.values():
             axes = joystick.get_numaxes()
