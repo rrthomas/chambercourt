@@ -868,10 +868,11 @@ Game instructions go here.
                     real_levels_path = Path(self.levels_path)
                 self.levels_files = sorted(
                     [
-                        item
-                        for item in real_levels_path.iterdir()
-                        if (not str(item.name).startswith("."))
-                        and item.suffix == ".tmx"
+                        file
+                        for file in real_levels_path.iterdir()
+                        if (not str(file.name).startswith("."))
+                        and file.is_file()
+                        and file.suffix == ".tmx"
                     ]
                 )
             except OSError as err:
