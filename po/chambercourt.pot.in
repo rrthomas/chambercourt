@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-12 17:35+0000\n"
+"POT-Creation-Date: 2025-01-17 18:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,24 +17,24 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: chambercourt/game.py:170
+#: chambercourt/game.py:165
 msgid "Play a game."
 msgstr ""
 
 #. TRANSLATORS: Please keep this text wrapped to 40 characters. The font
 #. used in-game is lacking many glyphs, so please test it with your
 #. language and let me know if I need to add glyphs.
-#: chambercourt/game.py:185
+#: chambercourt/game.py:180
 msgid "Game instructions go here.\n"
 msgstr ""
 
-#: chambercourt/game.py:187
+#: chambercourt/game.py:182
 msgid ""
 "    Z/X - Left/Right   '/? - Up/Down\n"
 "     or use the arrow keys to move\n"
 msgstr ""
 
-#: chambercourt/game.py:190
+#: chambercourt/game.py:185
 msgid ""
 "        S/L - Save/load position\n"
 "           R - Restart level\n"
@@ -42,39 +42,39 @@ msgid ""
 "         F - toggle full screen\n"
 msgstr ""
 
-#: chambercourt/game.py:195
+#: chambercourt/game.py:190
 msgid " (choose with movement keys and digits)\n"
 msgstr ""
 
-#: chambercourt/game.py:197
+#: chambercourt/game.py:192
 msgid "      Press the space bar to play!\n"
 msgstr ""
 
-#: chambercourt/game.py:259
+#: chambercourt/game.py:260
 msgid "cannot find asset `{}'"
 msgstr ""
 
-#: chambercourt/game.py:667
+#: chambercourt/game.py:641
 msgid "Start level: {}/{}"
 msgstr ""
 
-#: chambercourt/game.py:808
+#: chambercourt/game.py:789
 msgid "Level {}:"
 msgstr ""
 
-#: chambercourt/game.py:853
+#: chambercourt/game.py:834
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:859
+#: chambercourt/game.py:840
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr ""
 
-#: chambercourt/game.py:902
+#: chambercourt/game.py:882
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:905
+#: chambercourt/game.py:885
 msgid "Could not find any levels"
 msgstr ""
