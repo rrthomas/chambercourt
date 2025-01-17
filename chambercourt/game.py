@@ -137,6 +137,7 @@ class Game[Tile: StrEnum]:
         self.game_surface: pygame.Surface
         self.quit = False
         self.level = 1
+        self.moves = 0
         self.level_width: int
         self.level_height: int
         self.tile_width: int
@@ -699,6 +700,7 @@ Game instructions go here.
                 self.load_position()
                 frame = 0
                 moving = False
+                self.moves = 0
                 self.hero.velocity = Vector2(0, 0)
                 self._group.update(0)
                 self.start_play()
@@ -728,6 +730,7 @@ Game instructions go here.
                             self.hero.velocity = Vector2(allowed_move)
                             frame = 0
                             moving = True
+                            self.moves += 1
                     if frame == 0:
                         self.do_play()
                     frame = (frame + 1) % self.frames
