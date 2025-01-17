@@ -127,7 +127,7 @@ class Game[Tile: StrEnum]:
         self.empty_tile = empty_tile
         self.default_tile = default_tile
 
-        self.levels: int
+        self.num_levels: int
         self.levels_files: list[Path]
         self.hero_image: pygame.Surface
         self.app_icon: pygame.Surface
@@ -637,7 +637,9 @@ Game instructions go here.
             self.print_screen((0, self.instructions_y), instructions, color="grey")
             self.print_screen(
                 (0, start_level_y),
-                _("Start level: {}/{}").format(1 if level == 0 else level, self.levels),
+                _("Start level: {}/{}").format(
+                    1 if level == 0 else level, self.num_levels
+                ),
                 width=self.surface.get_width(),
                 align="center",
             )
@@ -661,14 +663,14 @@ Game instructions go here.
                     pygame.K_QUOTE,
                     pygame.K_UP,
                 ):
-                    level = min(self.levels, level + 1)
+                    level = min(self.num_levels, level + 1)
                 elif event.key in DIGIT_KEYS:
-                    level = min(self.levels, level * 10 + DIGIT_KEYS[event.key])
+                    level = min(self.num_levels, level * 10 + DIGIT_KEYS[event.key])
                 else:
                     level = 0
                 handle_global_keys(event)
             clock.tick(self.frames_per_second)
-        return max(min(level, self.levels), 1)
+        return max(min(level, self.num_levels), 1)
 
     def end_game(self) -> None:
         """Do any game-specific tear-down when the game ends."""
@@ -691,7 +693,7 @@ Game instructions go here.
         self.quit = False
         self.level = level
         clock = pygame.time.Clock()
-        while not self.quit and self.level <= self.levels:
+        while not self.quit and self.level <= self.num_levels:
             self.start_level()
             while not self.quit and not self.finished():
                 self.load_position()
@@ -736,7 +738,7 @@ Game instructions go here.
                 self.stop_play()
             if self.finished():
                 self.level += 1
-        if self.level > self.levels:
+        if self.level > self.num_levels:
             self.splurge(self.hero.image)
         self.end_game()
 
@@ -874,8 +876,8 @@ Game instructions go here.
                 )
             except OSError as err:
                 die(_("Error reading levels: {}").format(err.strerror))
-            self.levels = len(self.levels_files)
-            if self.levels == 0:
+            self.num_levels = len(self.levels_files)
+            if self.num_levels == 0:
                 die(_("Could not find any levels"))
             for level in self.levels_files:
                 self.map_timestamp[level] = 0
