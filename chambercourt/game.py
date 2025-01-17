@@ -436,7 +436,7 @@ Game instructions go here.
         self.hero.position = Vector2(0, 0)
 
         self.init_renderer()
-        self.init_physics()
+        self.init_game()
 
     def start_level(self) -> None:
         """Start a level, saving the initial position."""
@@ -528,7 +528,7 @@ Game instructions go here.
             with open(SAVED_POSITION_FILE, "rb") as fh:
                 self.set_map(pickle.load(fh))
             self.init_renderer()
-            self.init_physics()
+            self.init_game()
 
     def draw(self) -> None:
         """Draw the current position."""
@@ -742,8 +742,8 @@ Game instructions go here.
             self.splurge(self.hero.image)
         self.end_game()
 
-    def init_physics(self) -> None:
-        """Initialise the game physics.
+    def init_game(self) -> None:
+        """Initialise game state.
 
         This method should be overridden by games with game-specific
         initialisation.
