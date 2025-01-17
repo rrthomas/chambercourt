@@ -61,7 +61,3 @@ Thomas.
 The font “Acorn Mode 1”, which is based on the design of Acorn computers’
 system font, is by p1.mark and Reuben Thomas and licensed under CC BY-SA
 3.0.
-
-The death buzzer sound effect was adapted from
-[Buzzer sounds (Wrong answer/Error) by Breviceps](https://freesound.org/s/493163)
-under CC 0.
