@@ -694,7 +694,7 @@ Game instructions go here.
                 self.hero.velocity = Vector2(0, 0)
                 self._group.update(0)
                 self.start_play()
-                while not self.quit and not self.finished():
+                while not self.quit and not (self.finished() and not moving):
                     clock.tick(self.frames_per_second)
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
