@@ -581,7 +581,7 @@ Game instructions go here.
             self.quit = True
         return (dx, dy)
 
-    def game_to_screen(self, pos: tuple[int, int]) -> tuple[int, int]:
+    def game_to_screen(self, pos: Vector2) -> tuple[int, int]:
         """Convert game grid to screen coordinates.
 
         Args:
@@ -592,15 +592,15 @@ Game instructions go here.
         """
         origin = self._map_layer.get_center_offset()
         return (
-            origin[0] + pos[0] * self.tile_width,
-            origin[1] + pos[1] * self.tile_height,
+            origin[0] + int(pos.x) * self.tile_width,
+            origin[1] + int(pos.y) * self.tile_height,
         )
 
     def splurge(self, sprite: pygame.Surface) -> None:
         """Fill the game area with one sprite."""
         for x in range(self.level_width):
             for y in range(self.level_height):
-                self.game_surface.blit(sprite, self.game_to_screen((x, y)))
+                self.game_surface.blit(sprite, self.game_to_screen(Vector2(x, y)))
         self.show_screen()
         pygame.time.wait(3000)
 
@@ -675,6 +675,27 @@ Game instructions go here.
     def do_play(self) -> None:
         """Game-specific main loop logic."""
 
+    def end_level(self) -> None:
+        """End a level."""
+        origin = (
+            self.game_to_screen(self.hero.position)
+            + Vector2(self.tile_width, self.tile_height) / 2
+        )
+        max_radius = min(self.window_pixel_width, self.window_pixel_height) / 2
+        min_radius = max(self.tile_width, self.tile_height) / 2 + 1
+        radius_range = max_radius - min_radius
+        spotlight = pygame.Surface((self.window_pixel_width, self.window_pixel_height))
+        clock = pygame.time.Clock()
+        for i in range(self.frames_per_second):
+            clock.tick(self.frames_per_second)
+            spotlight.fill(Color("black"))
+            radius = max_radius - ((i + 1) / self.frames_per_second) ** 2 * radius_range
+            pygame.draw.circle(spotlight, Color("white"), origin, radius)
+            self.draw()
+            self.show_status()
+            self.game_surface.blit(spotlight, (0, 0), special_flags=pygame.BLEND_MIN)
+            self.show_screen()
+
     def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
 
@@ -730,6 +751,7 @@ Game instructions go here.
                     self.show_screen()
                 self.stop_play()
             if self.finished():
+                self.end_level()
                 self.level += 1
         if self.level > self.num_levels:
             self.splurge(self.hero.image)
