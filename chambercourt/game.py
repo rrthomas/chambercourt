@@ -228,7 +228,7 @@ Game instructions go here.
     frames = 8
     """Number of frames over which to animate each hero move."""
 
-    default_volume = 0.6
+    default_volume = 0.8
     """Default volume of sound effects."""
 
     def find_asset(self, asset_file: str) -> Path:
