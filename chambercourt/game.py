@@ -729,7 +729,7 @@ Game instructions go here.
                             self._joysticks[joy.get_instance_id()] = joy
                         elif event.type == pygame.JOYDEVICEREMOVED:
                             del self._joysticks[event.instance_id]
-                    if frame % self.frames == 0:
+                    if frame == 0:
                         self.hero.velocity = Vector2(0, 0)
                         moving = False
                     (dx, dy) = self.handle_input()
