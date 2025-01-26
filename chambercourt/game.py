@@ -741,9 +741,9 @@ Game instructions go here.
                     # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
                         allowed_move = (0, 0)
-                        if dx != 0 and self.can_move(Vector2(dx, 0)):
+                        if dx != 0 and self.try_move(Vector2(dx, 0)):
                             allowed_move = (dx, 0)
-                        elif dy != 0 and self.can_move(Vector2(0, dy)):
+                        elif dy != 0 and self.try_move(Vector2(0, dy)):
                             allowed_move = (0, dy)
                         if allowed_move != (0, 0):
                             self.hero.velocity = Vector2(allowed_move)
@@ -789,20 +789,20 @@ Game instructions go here.
                     self.hero.position = Vector2(x, y)
                     self.set(self.hero.position, self.empty_tile)
 
-    def can_move(self, velocity: Vector2) -> bool:
-        """Determine whether the hero can move by the given displacement.
+    def try_move(self, delta: Vector2) -> bool:
+        """Try to move the hero by the given displacement.
 
         Args:
-            velocity (Vector2): the displacement unit vector
+            delta (Vector2): the displacement unit vector
 
         Returns:
-            bool: `True` if the player can move in that direction, or
+            bool: `True` if the player has moved in that direction, or
               `False` otherwise.
 
         The default rule is that the player may not move on to
         `default_tile`.
         """
-        newpos = self.hero.position + velocity
+        newpos = self.hero.position + delta
         block = self.get(newpos)
         return block != self.default_tile
 
