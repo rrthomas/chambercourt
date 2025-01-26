@@ -673,7 +673,12 @@ Game instructions go here.
         """Do any game-specific tear-down when play is interrupted."""
 
     def do_play(self) -> None:
-        """Game-specific main loop logic."""
+        """Game-specific main loop logic.
+
+        When this method is called, the Hero is either stationary, or has
+        just completed a move to `self.hero.position`, as indicated by
+        `self.hero.velocity`.
+        """
 
     def end_level(self) -> None:
         """End a level."""
