@@ -8,7 +8,10 @@ update-pot:
 	find chambercourt -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=chambercourt --output=po/chambercourt.pot.in
 
 update-po:
-	for po in po/*.po; do msgmerge --update $$po po/chambercourt.pot; done
+	rm -f po/*.po
+	wget --recursive --level=1 --no-directories \
+			--accept=po --directory-prefix=po --no-verbose \
+			https://translationproject.org/latest/chambercourt/
 
 compile-po:
 	for po in po/*.po; do mo=chambercourt/locale/$$(basename $${po%.po})/LC_MESSAGES/chambercourt.mo; mkdir -p $$(dirname $$mo); msgfmt --output-file=$$mo $$po; done

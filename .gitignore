@@ -91,6 +91,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Translation Project provides all po files
+*.po
+
 # chambercourt-specific files
 *.tiled-session
 chambercourt.icns
