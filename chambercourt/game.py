@@ -443,7 +443,8 @@ Game instructions go here.
 
         Returns:
             Tile: the `Tile` at the given position
-        """  # Anything outside the map is a default tile
+        """
+        # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
         if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
             return self.default_tile
@@ -455,11 +456,14 @@ Game instructions go here.
         return self.tile_constructor(properties["type"])
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
-        self._map_tiles[int(pos.y)][int(pos.x)] = self._gids[tile]  # pyright: ignore
+        x, y = int(pos.x), int(pos.y)
+        if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
+            return
+        self._map_tiles[y][x] = self._gids[tile]  # pyright: ignore
         # Update rendered map
         # NOTE: We invoke protected methods and access protected members.
         ml = self._map_layer
-        rect = (int(pos.x), int(pos.y), 1, 1)
+        rect = (x, y, 1, 1)
         assert ml._tile_queue is not None
         ml._tile_queue = chain(ml._tile_queue, ml.data.get_tile_images_by_rect(rect))
         assert type(self._map_layer._buffer) is pygame.Surface
