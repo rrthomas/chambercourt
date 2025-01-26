@@ -719,6 +719,8 @@ Game instructions go here.
                     self.finished() and (frame == 0 or not moving)
                 ):
                     clock.tick(self.frames_per_second)
+
+                    # Check inputs
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             quit_game()
@@ -729,10 +731,9 @@ Game instructions go here.
                             self._joysticks[joy.get_instance_id()] = joy
                         elif event.type == pygame.JOYDEVICEREMOVED:
                             del self._joysticks[event.instance_id]
-                    if frame == 0:
-                        self.hero.velocity = Vector2(0, 0)
-                        moving = False
                     (dx, dy) = self.handle_input()
+
+                    # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
                         allowed_move = (0, 0)
                         if dx != 0 and self.can_move(Vector2(dx, 0)):
@@ -744,10 +745,18 @@ Game instructions go here.
                             frame = 0
                             moving = True
                             self.moves += 1
-                    if frame == 0:
-                        self.do_play()
+
+                    # Step frame counter and animate
                     frame = (frame + 1) % self.frames
                     self._group.update(1 / self.frames)
+
+                    # When frame counter wraps, run physics and end movement
+                    if frame == 0:
+                        self.do_play()
+                        self.hero.velocity = Vector2(0, 0)
+                        moving = False
+
+                    # Draw and display screen.
                     self.draw()
                     self.show_status()
                     self.show_screen()
