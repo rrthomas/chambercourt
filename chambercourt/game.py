@@ -672,8 +672,8 @@ Game instructions go here.
     def stop_play(self) -> None:
         """Do any game-specific tear-down when play is interrupted."""
 
-    def do_play(self) -> None:
-        """Game-specific main loop logic.
+    def update_map(self) -> None:
+        """Update the map after a move.
 
         When this method is called, the Hero is either stationary, or has
         just completed a move to `self.hero.position`, as indicated by
@@ -757,7 +757,7 @@ Game instructions go here.
 
                     # When frame counter wraps, run physics and end movement
                     if frame == 0:
-                        self.do_play()
+                        self.update_map()
                         self.hero.velocity = Vector2(0, 0)
                         moving = False
 
