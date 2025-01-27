@@ -56,7 +56,8 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           nuget install Gettext.Tools -Version 0.22.4 -OutputDirectory c:\nuget;
-          Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin"
+          Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin";
+          choco install wget
       - name: Install Python dependencies
         run: pip install tox build setuptools pygame i18nparse platformdirs pyscroll pytmx
       - name: Build
