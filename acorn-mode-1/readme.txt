@@ -12,7 +12,7 @@ Alike license (http://creativecommons.org/licenses/by-sa/3.0/).
 Try Fontstruct at https://fontstruct.com
 It’s easy and it’s fun.
 
-Fontstruct is copyright ©2024 Rob Meek
+Fontstruct is copyright ©2024-2025 Rob Meek
 
 LEGAL NOTICE:
 In using this font you must comply with the licensing terms described in the
