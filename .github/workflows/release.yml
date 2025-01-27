@@ -26,24 +26,11 @@ jobs:
       - name: Install non-Python build dependencies
         run: sudo apt-get -y install gettext
       - name: Install Python dependencies
-        run: pip install tox build pygame i18nparse platformdirs pyscroll pytmx toml-cli
-      - name: Install Woger
-        run: |
-          sudo apt-get -y install libperl6-slurp-perl libset-scalar-perl s-nail
-          wget https://github.com/rrthomas/woger/raw/refs/heads/main/woger
-          chmod +x woger
+        run: pip install tox build pygame i18nparse platformdirs pyscroll pytmx
       - name: Build
         run: make dist
       - name: Make the release
-        run: |
-          gh release create ${{ github.ref_name }} --title "Release ${{ github.ref_name}}" dist/*
-          export package=$(toml get --toml-path pyproject.toml "tool.setuptools.packages[0]")
-          export package_name=$(toml get --toml-path pyproject.toml project.name)
-          export version=$(toml get --toml-path pyproject.toml project.version)
-          export description=$(toml get --toml-path pyproject.toml project.description)
-          export home=$(toml get --toml-path pyproject.toml project.urls.Homepage)
-          export release_url=https://github.com/rrthomas/chambercourt/releases/download/v$version/$package-$version.tar.gz
-          ./woger translationproject package=$package package_name="$package_name" version=$version home=$home release_url=$release_url description="$description"
+        run: gh release create ${{ github.ref_name }} --title "Release ${{ github.ref_name}}" dist/*
 
   binary-release:
     name: Make binary release
