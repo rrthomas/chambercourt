@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 11:19+0000\n"
+"POT-Creation-Date: 2025-01-27 12:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,42 +17,42 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: chambercourt/game.py:250 chambercourt/.bak.0.game.py:250
+#: chambercourt/game.py:250
 msgid "cannot find asset `{}'"
 msgstr ""
 
-#: chambercourt/game.py:627 chambercourt/.bak.0.game.py:631
+#: chambercourt/game.py:627
 msgid "Start level: {}/{}"
 msgstr ""
 
-#: chambercourt/game.py:837 chambercourt/.bak.0.game.py:801
+#: chambercourt/game.py:837
 msgid "Level {}:"
 msgstr ""
 
-#: chambercourt/game.py:882 chambercourt/.bak.0.game.py:846
+#: chambercourt/game.py:882
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:888 chambercourt/.bak.0.game.py:852
+#: chambercourt/game.py:888
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr ""
 
-#: chambercourt/game.py:930 chambercourt/.bak.0.game.py:894
+#: chambercourt/game.py:930
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:933 chambercourt/.bak.0.game.py:897
+#: chambercourt/game.py:933
 msgid "Could not find any levels"
 msgstr ""
 
-#: chambercourt/game.py:946 chambercourt/.bak.0.game.py:910
+#: chambercourt/game.py:946
 msgid ""
 "    Z/X - Left/Right   '/? - Up/Down\n"
 "     or use the arrow keys to move\n"
 msgstr ""
 
-#: chambercourt/game.py:951 chambercourt/.bak.0.game.py:915
+#: chambercourt/game.py:951
 msgid ""
 "        S/L - Save/load position\n"
 "           R - Restart level\n"
@@ -60,10 +60,10 @@ msgid ""
 "         F - toggle full screen\n"
 msgstr ""
 
-#: chambercourt/game.py:958 chambercourt/.bak.0.game.py:922
+#: chambercourt/game.py:958
 msgid " (choose with movement keys and digits)\n"
 msgstr ""
 
-#: chambercourt/game.py:962 chambercourt/.bak.0.game.py:926
+#: chambercourt/game.py:962
 msgid "      Press the space bar to play!\n"
 msgstr ""
