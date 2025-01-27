@@ -600,14 +600,6 @@ Game instructions go here.
             origin[1] + int(pos.y) * self.tile_height,
         )
 
-    def splurge(self, sprite: pygame.Surface) -> None:
-        """Fill the game area with one sprite."""
-        for x in range(self.level_width):
-            for y in range(self.level_height):
-                self.game_surface.blit(sprite, self.game_to_screen(Vector2(x, y)))
-        self.show_screen()
-        pygame.time.wait(3000)
-
     def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
         """Show instructions and choose start level."""
         clear_keys()
@@ -686,6 +678,8 @@ Game instructions go here.
 
     def end_level(self) -> None:
         """End a level."""
+        if self.level == self.num_levels:
+            return
         origin = (
             self.game_to_screen(self.hero.position)
             + Vector2(self.tile_width, self.tile_height) / 2
@@ -704,6 +698,28 @@ Game instructions go here.
             self.show_status()
             self.game_surface.blit(spotlight, (0, 0), special_flags=pygame.BLEND_MIN)
             self.show_screen()
+
+    def win_game(self) -> None:
+        """Win the game."""
+        self._group.remove(self.hero)
+        max_radius = min(self.window_pixel_width, self.window_pixel_height) / 2
+        min_radius = max(self.tile_width, self.tile_height) / 2 + 1
+        origin = Vector2(self.game_to_screen(self.hero.position))
+        destination = Vector2(0, 0)
+        delta = destination - origin
+        radius_range = max_radius - min_radius
+        clock = pygame.time.Clock()
+        for i in range(self.frames_per_second):
+            clock.tick(self.frames_per_second)
+            factor = ((i + 1) / self.frames_per_second) ** 2
+            radius = min_radius + radius_range * factor
+            zoomed_hero = pygame.transform.scale(
+                self.hero.image, (radius * 2, radius * 2)
+            )
+            self.draw()
+            self.game_surface.blit(zoomed_hero, origin + delta * factor)
+            self.show_screen()
+        pygame.time.wait(2000)
 
     def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
@@ -774,7 +790,7 @@ Game instructions go here.
                 self.end_level()
                 self.level += 1
         if self.level > self.num_levels:
-            self.splurge(self.hero.image)
+            self.win_game()
         self.end_game()
 
     def init_game(self) -> None:
