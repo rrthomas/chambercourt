@@ -95,6 +95,70 @@ DIGIT_KEYS = {
 }
 
 
+class Sprite(pygame.sprite.Sprite):
+    """A class representing a game sprite."""
+
+    def __init__(
+        self, image: pygame.Surface, position=Vector2(0, 0), velocity=Vector2(0, 0)
+    ) -> None:
+        """Create a game Sprite.
+
+        Args:
+            image (pygame.Surface): the sprite image
+
+            position (Vector2, optional): The initial position. Defaults to
+              `Vector2(0, 0)`.
+
+            velocity (Vector2, optional): The initial velocity. Defaults to
+              `Vector2(0, 0)`.
+        """
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.position = position
+        self.velocity = velocity
+        self.rect = self.image.get_rect()
+        self.tile_size = Vector2(self.image.get_width(), self.image.get_height())
+
+    def update(self, dt: float) -> None:
+        """Move the object according to its velocity for the given time interval.
+
+        Args:
+            dt (float): the elapsed time in milliseconds
+        """
+        self.position += self.velocity * dt
+        screen_pos = Vector2(
+            self.position.x * self.tile_size.x, self.position.y * self.tile_size.y
+        )
+        self.rect.topleft = (int(screen_pos.x), int(screen_pos.y))
+
+
+class Hero(Sprite):
+    """A class representing the hero."""
+
+    def __init__(self, image: pygame.Surface) -> None:
+        """Create a Hero object.
+
+        Args:
+            image (pygame.Surface): the hero image
+        """
+        super().__init__(image)
+
+
+class Object[Tile: StrEnum](Sprite):
+    """A class representing a game object."""
+
+    def __init__(
+        self,
+        image: pygame.Surface,
+        tile: Tile,
+        position=Vector2(0, 0),
+        velocity=Vector2(0, 0),
+    ) -> None:
+        """Create a Game object."""
+        super().__init__(image, position, velocity)
+        self.tile = tile
+
+
 class Game[Tile: StrEnum]:
     """The `Game` class represents the state of a game.
 
@@ -154,6 +218,8 @@ class Game[Tile: StrEnum]:
         self.hero: Hero
         self.map_data: pyscroll.data.TiledMapData
         self._joysticks: dict[int, pygame.joystick.JoystickType] = {}
+
+        self.objects: list[Object] = []
 
     @staticmethod
     def description() -> str:
@@ -724,7 +790,9 @@ Game instructions go here.
                     ):
                         level_change = 1
                     elif event.key in DIGIT_KEYS:
-                        level = min(self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key])
+                        level = min(
+                            self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key]
+                        )
                     else:
                         level = None
                     handle_global_keys(event)
@@ -802,6 +870,38 @@ Game instructions go here.
             self.show_screen()
         pygame.time.wait(2000)
 
+    def make_object(self, position: Vector2) -> Object:
+        """Turn the given map position into an object.
+
+        This removes the object from the given position from the map.
+
+        Args:
+            position (Vector2): the object's position.
+        """
+        tile = self.get(position)
+        image = self.map_data.tmx.get_tile_image(int(position.x), int(position.y), 0)
+        assert type(image) is pygame.Surface
+        self.set(position, self.empty_tile)
+        obj = Object(image, tile, position)
+        self._group.add(obj)
+        return obj
+
+    def add_frame_object(self, obj: Object, velocity: Vector2) -> None:
+        """Add an object for the current frame.
+
+        Args:
+            obj (Object): the object's position
+            velocity (Vector2): the object's velocity
+        """
+        obj.velocity = velocity
+        self.objects.append(obj)
+
+    def _remove_objects(self) -> None:
+        """Stop objects moving (called at the end of a frame)."""
+        for obj in self.objects:
+            obj.velocity = Vector2(0, 0)
+        self.objects = []
+
     def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
 
@@ -817,6 +917,7 @@ Game instructions go here.
                 self.load_position()
                 frame = 0
                 moving = False
+                self._remove_objects()
                 self.moves = 0
                 self.hero.velocity = Vector2(0, 0)
                 self._group.update(0)
@@ -855,6 +956,7 @@ Game instructions go here.
 
                     # When frame counter wraps, run physics and end movement
                     if frame == 0:
+                        self._remove_objects()
                         self.update_map()
                         self.hero.velocity = Vector2(0, 0)
                         moving = False
@@ -1059,36 +1161,3 @@ Press the space bar or button A to play!
                 self.run(level)
         except KeyboardInterrupt:
             quit_game()
-
-
-class Hero(pygame.sprite.Sprite):
-    """A class representing the hero.
-
-    Args:
-        pygame (pygame.sprite.Sprite): the sprite used for the hero.
-    """
-
-    def __init__(self, image: pygame.Surface) -> None:
-        """Create a Hero object.
-
-        Args:
-            image (pygame.Surface): the hero image
-        """
-        pygame.sprite.Sprite.__init__(self)
-        self.image = image
-        self.velocity = Vector2(0, 0)
-        self.position = Vector2(0, 0)
-        self.rect = self.image.get_rect()
-        self.tile_size = Vector2(self.image.get_width(), self.image.get_height())
-
-    def update(self, dt: float) -> None:
-        """Move the hero according to its velocity for the given time interval.
-
-        Args:
-            dt (float): the elapsed time in milliseconds
-        """
-        self.position += self.velocity * dt
-        screen_pos = Vector2(
-            self.position.x * self.tile_size.x, self.position.y * self.tile_size.y
-        )
-        self.rect.topleft = (int(screen_pos.x), int(screen_pos.y))
