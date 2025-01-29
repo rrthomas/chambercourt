@@ -552,12 +552,28 @@ Game instructions go here.
                     dy = 1
         return (dx, dy)
 
-    def handle_input(self) -> tuple[int, int]:
-        """Handle input during the game.
+    def handle_game_keys(self, event: pygame.event.Event) -> None:
+        """Handle in-game keypresses other than player controls.
 
-        This handles all supported input devices, and both in-game controls
-        (including loading/saving position etc.) and global controls (e.g.
-        toggling fullscreen).
+        Args:
+            event (pygame.event.Event): a keypress event.
+        """
+        if event.key == pygame.K_l:
+            self.flash_background()
+            self.load_position()
+        elif event.key == pygame.K_s:
+            self.flash_background()
+            self.save_position()
+        if event.key == pygame.K_r:
+            self.flash_background()
+            self.restart_level()
+        if event.key == pygame.K_q:
+            self.quit = True
+
+    def handle_player_controls(self) -> tuple[int, int]:
+        """Handle player control input during the game.
+
+        This handles all supported input devices.
         """
         pressed = pygame.key.get_pressed()
         dx, dy = (0, 0)
@@ -572,17 +588,6 @@ Game instructions go here.
         (jdx, jdy) = self.handle_joysticks()
         if (jdx, jdy) != (0, 0):
             (dx, dy) = (jdx, jdy)
-        if pressed[pygame.K_l]:
-            self.flash_background()
-            self.load_position()
-        elif pressed[pygame.K_s]:
-            self.flash_background()
-            self.save_position()
-        if pressed[pygame.K_r]:
-            self.flash_background()
-            self.restart_level()
-        if pressed[pygame.K_q]:
-            self.quit = True
         return (dx, dy)
 
     def game_to_screen(self, pos: Vector2) -> tuple[int, int]:
@@ -751,12 +756,13 @@ Game instructions go here.
                             quit_game()
                         elif event.type == pygame.KEYDOWN:
                             handle_global_keys(event)
+                            self.handle_game_keys(event)
                         elif event.type == pygame.JOYDEVICEADDED:
                             joy = pygame.joystick.Joystick(event.device_index)
                             self._joysticks[joy.get_instance_id()] = joy
                         elif event.type == pygame.JOYDEVICEREMOVED:
                             del self._joysticks[event.instance_id]
-                    (dx, dy) = self.handle_input()
+                    (dx, dy) = self.handle_player_controls()
 
                     # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
