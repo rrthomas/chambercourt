@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 12:30+0000\n"
+"POT-Creation-Date: 2025-01-29 18:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,38 +21,38 @@ msgstr ""
 msgid "cannot find asset `{}'"
 msgstr ""
 
-#: chambercourt/game.py:627
+#: chambercourt/game.py:632
 msgid "Start level: {}/{}"
 msgstr ""
 
-#: chambercourt/game.py:837
+#: chambercourt/game.py:843
 msgid "Level {}:"
 msgstr ""
 
-#: chambercourt/game.py:882
+#: chambercourt/game.py:888
 msgid "a directory or Zip file of levels to use"
 msgstr ""
 
-#: chambercourt/game.py:888
+#: chambercourt/game.py:894
 #, python-format
 msgid "%(prog)s {} by {}"
 msgstr ""
 
-#: chambercourt/game.py:930
+#: chambercourt/game.py:936
 msgid "Error reading levels: {}"
 msgstr ""
 
-#: chambercourt/game.py:933
+#: chambercourt/game.py:939
 msgid "Could not find any levels"
 msgstr ""
 
-#: chambercourt/game.py:946
+#: chambercourt/game.py:952
 msgid ""
 "    Z/X - Left/Right   '/? - Up/Down\n"
 "     or use the arrow keys to move\n"
 msgstr ""
 
-#: chambercourt/game.py:951
+#: chambercourt/game.py:957
 msgid ""
 "        S/L - Save/load position\n"
 "           R - Restart level\n"
@@ -60,10 +60,10 @@ msgid ""
 "         F - toggle full screen\n"
 msgstr ""
 
-#: chambercourt/game.py:958
+#: chambercourt/game.py:964
 msgid " (choose with movement keys and digits)\n"
 msgstr ""
 
-#: chambercourt/game.py:962
+#: chambercourt/game.py:968
 msgid "      Press the space bar to play!\n"
 msgstr ""
