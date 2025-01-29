@@ -22,10 +22,6 @@ update-pofiles:
 	$(MAKE) update-po
 	$(MAKE) compile-po
 
-# Show changes to POT file since last release
-show-pot-changes:
-	git diff $$(git tag --sort=-creatordate | head -n 2 | tail -n 1)..$$(git describe --abbrev=0 --tags) po/wincoll.pot.in
-
 announce-pot:
 	woger translationproject \
 		package=$(toml get --toml-path pyproject.toml "tool.setuptools.packages[0]") \
@@ -54,7 +50,7 @@ release:
 	twine upload dist/* && \
 	git tag v$$(grep version pyproject.toml | grep -o "[0-9.]\+") && \
 	git push --tags && \
-	$(MAKE) show-pot-changes
+	git diff po/chambercourt.pot.in
 
 loc:
 	cloc --exclude-content="ptext module" chambercourt/*.py
