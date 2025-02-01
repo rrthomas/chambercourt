@@ -4,8 +4,9 @@ po/chambercourt.pot: po/chambercourt.pot.in
 	sed -e s/VERSION/$$(grep version pyproject.toml | grep -o "[0-9.]\+")/ < $^ > $@
 
 update-pot:
-	$(MAKE) po/chambercourt.pot
+	mkdir -p po
 	find chambercourt -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=chambercourt --output=po/chambercourt.pot.in
+	$(MAKE) po/chambercourt.pot
 
 update-po:
 	rm -f po/*.po
@@ -49,8 +50,7 @@ release:
 	$(MAKE) dist && \
 	twine upload dist/* && \
 	git tag v$$(grep version pyproject.toml | grep -o "[0-9.]\+") && \
-	git push --tags && \
-	git diff po/chambercourt.pot.in
+	git push --tags
 
 loc:
 	cloc --exclude-content="ptext module" chambercourt/*.py

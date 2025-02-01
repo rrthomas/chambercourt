@@ -97,5 +97,5 @@ ENV/
 # chambercourt-specific files
 *.tiled-session
 chambercourt.icns
-po/chambercourt.pot
+po/chambercourt.pot*
 docs/
