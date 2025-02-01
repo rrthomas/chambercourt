@@ -14,6 +14,7 @@ class Tile(StrEnum):
 
     EMPTY = auto()
     BRICK = auto()
+    JEWEL = auto()
     HERO = auto()
 
 

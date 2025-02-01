@@ -838,11 +838,15 @@ Game instructions go here.
               `False` otherwise.
 
         The default rule is that the player may not move on to
-        `default_tile`.
+        `default_tile`, and that any other tile is set to empty when the
+        player moves on to it.
         """
         newpos = self.hero.position + delta
         block = self.get(newpos)
-        return block != self.default_tile
+        if block != self.default_tile:
+            self.set(newpos, self.empty_tile)
+            return True
+        return False
 
     def show_status(self) -> None:
         """Update the status display.
@@ -863,12 +867,18 @@ Game instructions go here.
     def finished(self) -> bool:
         """Indicate whether the current level is finished.
 
-        This method should be overridden.
+        This method should be overridden. The default is to declare the
+        level finished when only hero, default and empty tiles are left.
 
         Returns:
             bool: a flag indicating whether the current level is finished
         """
-        return False
+        for x in range(self.level_width):
+            for y in range(self.level_height):
+                block = self.get(Vector2(x, y))
+                if block not in (self.hero_tile, self.default_tile, self.empty_tile):
+                    return False
+        return True
 
     def main(self, argv: list[str]) -> None:
         """Main function for the game.
