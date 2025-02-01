@@ -252,6 +252,7 @@ Game instructions go here.
     def init_screen(self) -> None:
         """Initialise the screen."""
         self.font_pixels = 8 * self.window_scale * self.font_scale
+        self.screen_char_width = self.screen_size[0] // self.font_pixels
         self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
         # Force ptext to cache the font
@@ -626,7 +627,13 @@ Game instructions go here.
                     12 * self.window_scale,
                 ),
             )
-            self.print_screen((0, self.instructions_y), instructions, color="grey")
+            self.print_screen(
+                (0, self.instructions_y),
+                instructions,
+                color="grey",
+                width=self.surface.get_width(),
+                align="center",
+            )
             self.print_screen(
                 (0, start_level_y),
                 _("Start level: {}/{}").format(
@@ -950,23 +957,23 @@ Game instructions go here.
                     self.instructions()
                     + "\n"
                     + _("""\
-    Z/X - Left/Right   '/? - Up/Down
-     or use the arrow keys to move
+Z/X - Left/Right   '/? - Up/Down
+or use the arrow keys to move
 """)
                     + "\n"
                     + _("""\
-        S/L - Save/load position
-           R - Restart level
-             Q - Quit game
-         F - toggle full screen
+S/L - Save/load position
+R - Restart level
+Q - Quit game
+F - toggle full screen
 """)
                     + "\n\n"
                     + _("""\
- (choose with movement keys and digits)
+(choose with movement keys and digits)
 """)
                     + "\n"
                     + _("""\
-      Press the space bar to play!
+Press the space bar to play!
 """),
                 )
                 self.run(level)
