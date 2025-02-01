@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="8" height="8" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#000000" nextlayerid="2" nextobjectid="1">
  <properties>
-  <property name="Title" value="Plain map"/>
+  <property name="Title" value="Another plain map"/>
  </properties>
  <tileset firstgid="1" source="Tileset.tsx"/>
  <layer id="1" name="Tile Layer 1" width="8" height="8">
