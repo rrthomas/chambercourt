@@ -581,15 +581,15 @@ Game instructions go here.
 
         This handles all supported input devices.
         """
-        pressed = pygame.key.get_pressed()
+        pressed = list(pygame.key.get_pressed())  # Get list indexable by scancodes
         dx, dy = (0, 0)
-        if pressed[pygame.K_LEFT] or pressed[pygame.K_z]:
+        if pressed[pygame.KSCAN_LEFT] or pressed[pygame.KSCAN_Z]:
             dx -= 1
-        if pressed[pygame.K_RIGHT] or pressed[pygame.K_x]:
+        if pressed[pygame.KSCAN_RIGHT] or pressed[pygame.KSCAN_X]:
             dx += 1
-        if pressed[pygame.K_UP] or pressed[pygame.K_QUOTE]:
+        if pressed[pygame.KSCAN_UP] or pressed[pygame.KSCAN_APOSTROPHE]:
             dy -= 1
-        if pressed[pygame.K_DOWN] or pressed[pygame.K_SLASH]:
+        if pressed[pygame.KSCAN_DOWN] or pressed[pygame.KSCAN_SLASH]:
             dy += 1
         (jdx, jdy) = self.handle_joysticks()
         if (jdx, jdy) != (0, 0):
@@ -652,20 +652,20 @@ Game instructions go here.
             for event in pygame.event.get(pygame.KEYDOWN):
                 if event.key == pygame.K_q:
                     quit_game()
-                elif event.key == pygame.K_SPACE:
+                elif event.scancode == pygame.KSCAN_SPACE:
                     play = True
-                elif event.key in (
-                    pygame.K_z,
-                    pygame.K_LEFT,
-                    pygame.K_SLASH,
-                    pygame.K_DOWN,
+                elif event.scancode in (
+                    pygame.KSCAN_Z,
+                    pygame.KSCAN_LEFT,
+                    pygame.KSCAN_SLASH,
+                    pygame.KSCAN_DOWN,
                 ):
                     level = max(1, level - 1)
-                elif event.key in (
-                    pygame.K_x,
-                    pygame.K_RIGHT,
-                    pygame.K_QUOTE,
-                    pygame.K_UP,
+                elif event.scancode in (
+                    pygame.KSCAN_X,
+                    pygame.KSCAN_RIGHT,
+                    pygame.KSCAN_APOSTROPHE,
+                    pygame.KSCAN_UP,
                 ):
                     level = min(self.num_levels, level + 1)
                 elif event.key in DIGIT_KEYS:
@@ -962,14 +962,25 @@ Game instructions go here.
             while True:
                 level = self.title_screen(
                     self.title_image.convert(),
-                    # TRANSLATORS: Please keep this text wrapped to 40 characters.
                     self.instructions()
                     + "\n"
+# TRANSLATORS: Please keep this text wrapped to 40 characters.
+# Bear in mind that it will be centred.
+#. The key names Z, X etc. here and in the following
+#. messages need to be translated to the key name in the
+#. same position on your language layout's keyboard as
+#. the English key on a US keyboard.
                     + _("""\
 Z/X - Left/Right   '/? - Up/Down
 or use the arrow keys to move
 """)
                     + "\n"
+# TRANSLATORS: Please keep this text wrapped to 40 characters.
+# Bear in mind that it will be centred.
+#. The key names Z, X etc. here and in the following
+#. messages need to be translated to the key name in the
+#. same position on your language layout's keyboard as
+#. the English key on a US keyboard.
                     + _("""\
 S/L - Save/load position
 R - Restart level
@@ -977,10 +988,14 @@ Q - Quit game
 F - toggle full screen
 """)
                     + "\n\n"
+# TRANSLATORS: Please keep this text wrapped to 40 characters.
+# Bear in mind that it will be centred.
                     + _("""\
 (choose with movement keys and digits)
 """)
                     + "\n"
+# TRANSLATORS: Please keep this text wrapped to 40 characters.
+# Bear in mind that it will be centred.
                     + _("""\
 Press the space bar to play!
 """),
