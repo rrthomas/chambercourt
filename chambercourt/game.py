@@ -536,6 +536,19 @@ Game instructions go here.
         self._group.center(self.hero.rect.center)
         self._group.draw(self.game_surface)
 
+    def handle_joystick_plug(self, event: pygame.event.Event) -> None:
+        """Track joystick plug/unplug events.
+
+        Args:
+            event (pygame.event.Event): An event that might be a plug/unplug
+              event.
+        """
+        if event.type == pygame.JOYDEVICEADDED:
+            joy = pygame.joystick.Joystick(event.device_index)
+            self._joysticks[joy.get_instance_id()] = joy
+        elif event.type == pygame.JOYDEVICEREMOVED:
+            del self._joysticks[event.instance_id]
+
     def handle_joysticks(self) -> tuple[int, int]:
         """Get joystick/gamepad input.
 
@@ -564,16 +577,34 @@ Game instructions go here.
         Args:
             event (pygame.event.Event): a keypress event.
         """
-        if event.key == pygame.K_l:
+        load_pressed = False
+        if event.type == pygame.KEYDOWN:
+            load_pressed = event.key == pygame.K_l
+        elif event.type == pygame.JOYBUTTONDOWN:
+            load_pressed = event.button == 1
+
+        save_pressed = False
+        if event.type == pygame.KEYDOWN:
+            save_pressed = event.key == pygame.K_s
+        elif event.type == pygame.JOYBUTTONDOWN:
+            save_pressed = event.button == 0
+
+        restart_pressed = False
+        if event.type == pygame.KEYDOWN:
+            restart_pressed = event.key == pygame.K_r
+        elif event.type == pygame.JOYBUTTONDOWN:
+            restart_pressed = event.button == 3
+
+        if load_pressed:
             self.flash_background()
             self.load_position()
-        elif event.key == pygame.K_s:
+        elif save_pressed:
             self.flash_background()
             self.save_position()
-        if event.key == pygame.K_r:
+        if restart_pressed:
             self.flash_background()
             self.restart_level()
-        if event.key == pygame.K_q:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
             self.quit = True
 
     def handle_player_controls(self) -> tuple[int, int]:
@@ -649,30 +680,39 @@ Game instructions go here.
             )
             pygame.display.flip()
             handle_quit_event()
-            for event in pygame.event.get(pygame.KEYDOWN):
-                if event.key == pygame.K_q:
-                    quit_game()
-                elif event.key == pygame.K_SPACE:
-                    play = True
-                elif event.key in (
-                    pygame.K_z,
-                    pygame.K_LEFT,
-                    pygame.K_SLASH,
-                    pygame.K_DOWN,
-                ):
-                    level = max(1, level - 1)
-                elif event.key in (
-                    pygame.K_x,
-                    pygame.K_RIGHT,
-                    pygame.K_QUOTE,
-                    pygame.K_UP,
-                ):
-                    level = min(self.num_levels, level + 1)
-                elif event.key in DIGIT_KEYS:
-                    level = min(self.num_levels, level * 10 + DIGIT_KEYS[event.key])
-                else:
-                    level = 0
-                handle_global_keys(event)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        quit_game()
+                    elif event.key == pygame.K_SPACE:
+                        play = True
+                    elif event.key in (
+                        pygame.K_z,
+                        pygame.K_LEFT,
+                        pygame.K_SLASH,
+                        pygame.K_DOWN,
+                    ):
+                        level -= 1
+                    elif event.key in (
+                        pygame.K_x,
+                        pygame.K_RIGHT,
+                        pygame.K_QUOTE,
+                        pygame.K_UP,
+                    ):
+                        level += 1
+                    elif event.key in DIGIT_KEYS:
+                        level = min(self.num_levels, level * 10 + DIGIT_KEYS[event.key])
+                    else:
+                        level = 0
+                    handle_global_keys(event)
+                elif event.type == pygame.JOYBUTTONDOWN:
+                    if event.button == 0:
+                        play = True
+                elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
+                    self.handle_joystick_plug(event)
+                (dx, dy) = self.handle_joysticks()
+                level += dx - dy
+                level = max(1, min(self.num_levels, level))
             clock.tick(self.frames_per_second)
         return max(min(level, self.num_levels), 1)
 
@@ -766,14 +806,10 @@ Game instructions go here.
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             quit_game()
-                        elif event.type == pygame.KEYDOWN:
+                        elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
                             handle_global_keys(event)
                             self.handle_game_keys(event)
-                        elif event.type == pygame.JOYDEVICEADDED:
-                            joy = pygame.joystick.Joystick(event.device_index)
-                            self._joysticks[joy.get_instance_id()] = joy
-                        elif event.type == pygame.JOYDEVICEREMOVED:
-                            del self._joysticks[event.instance_id]
+                        self.handle_joystick_plug(event)
                     (dx, dy) = self.handle_player_controls()
 
                     # If Hero is not moving already, try to start new move
@@ -977,12 +1013,13 @@ Game instructions go here.
                     + "\n"
                     + _("""\
 Z/X - Left/Right   '/? - Up/Down
-or use the arrow keys to move
+or arrow keys or joystick to move
 """)
                     + "\n"
                     + _("""\
-S/L - Save/load position
-R - Restart level
+S/Button A - Save position
+L/Button B - Save position
+R/Button Y - Restart level
 Q - Quit game
 F - toggle full screen
 """)
@@ -992,7 +1029,7 @@ F - toggle full screen
 """)
                     + "\n"
                     + _("""\
-Press the space bar to play!
+Press the space bar or button A to play!
 """),
                 )
                 self.run(level)
