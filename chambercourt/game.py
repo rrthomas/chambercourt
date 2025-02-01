@@ -235,7 +235,8 @@ Game instructions go here.
         """Find a game asset.
 
         First look at the given level files directory, then fall back to the
-        default levels directory.
+        default levels directory for the application, then fall back to
+        ChamberCourt's levels directory.
 
         Args:
             asset_file (str): name of asset file
@@ -247,6 +248,10 @@ Game instructions go here.
             fallback_asset = Path(self.app_path / "levels" / asset_file)
             if fallback_asset.exists():
                 return fallback_asset
+            else:
+                built_in_asset = Path(self.fallback_path / "levels" / asset_file)
+                if built_in_asset.exists():
+                    return built_in_asset
         raise OSError(_("cannot find asset `{}'").format(asset_file))
 
     def init_screen(self) -> None:
@@ -885,68 +890,72 @@ Game instructions go here.
         os.environ["SDL_APP_NAME"] = metadata["Name"]
 
         with importlib.resources.as_file(
-            importlib.resources.files(self.game_package_name)
-        ) as path:
-            # Command-line arguments
-            parser = argparse.ArgumentParser(description=self.description())
-            parser.add_argument(
-                "--levels",
-                metavar="DIRECTORY",
-                help=_("a directory or Zip file of levels to use"),
-            )
-            parser.add_argument(
-                "-V",
-                "--version",
-                action="version",
-                version=_("%(prog)s {} by {}").format(
-                    version, metadata["Author-email"]
-                ),
-            )
-            warnings.showwarning = simple_warning(parser.prog)
-            args = parser.parse_args(argv)
-
-            self.app_path = Path(path)
-            self.levels_path = Path(args.levels or self.app_path / "levels")
-
-            # Initialize pygame
-            pygame.init()
-            self.load_assets()
-            pygame.display.set_icon(self.app_icon)
-            pygame.mouse.set_visible(False)
-            pygame.font.init()
-            pygame.key.set_repeat()
-            pygame.joystick.init()
-            pygame.display.set_caption(metadata["Name"])
-            self.init_screen()
-
-            # Load levels
-            try:
-                real_levels_path: Path
-                if zipfile.is_zipfile(self.levels_path):
-                    tmpdir = TemporaryDirectory()
-                    real_levels_path = Path(tmpdir.name)
-                    with zipfile.ZipFile(self.levels_path) as z:
-                        z.extractall(real_levels_path)
-                    atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
-                else:
-                    real_levels_path = Path(self.levels_path)
-                self.levels_files = sorted(
-                    [
-                        file
-                        for file in real_levels_path.iterdir()
-                        if (not str(file.name).startswith("."))
-                        and file.is_file()
-                        and file.suffix == ".tmx"
-                    ]
+            importlib.resources.files("chambercourt")
+        ) as fallback_path:
+            with importlib.resources.as_file(
+                importlib.resources.files(self.game_package_name)
+            ) as path:
+                # Command-line arguments
+                parser = argparse.ArgumentParser(description=self.description())
+                parser.add_argument(
+                    "--levels",
+                    metavar="DIRECTORY",
+                    help=_("a directory or Zip file of levels to use"),
                 )
-            except OSError as err:
-                die(_("Error reading levels: {}").format(err.strerror))
-            self.num_levels = len(self.levels_files)
-            if self.num_levels == 0:
-                die(_("Could not find any levels"))
-            for level in self.levels_files:
-                self.map_timestamp[level] = 0
-                self.load_level(level)
+                parser.add_argument(
+                    "-V",
+                    "--version",
+                    action="version",
+                    version=_("%(prog)s {} by {}").format(
+                        version, metadata["Author-email"]
+                    ),
+                )
+                warnings.showwarning = simple_warning(parser.prog)
+                args = parser.parse_args(argv)
+
+                self.app_path = Path(path)
+                self.fallback_path = Path(fallback_path)
+                self.levels_path = Path(args.levels or self.app_path / "levels")
+
+                # Initialize pygame
+                pygame.init()
+                self.load_assets()
+                pygame.display.set_icon(self.app_icon)
+                pygame.mouse.set_visible(False)
+                pygame.font.init()
+                pygame.key.set_repeat()
+                pygame.joystick.init()
+                pygame.display.set_caption(metadata["Name"])
+                self.init_screen()
+
+                # Load levels
+                try:
+                    real_levels_path: Path
+                    if zipfile.is_zipfile(self.levels_path):
+                        tmpdir = TemporaryDirectory()
+                        real_levels_path = Path(tmpdir.name)
+                        with zipfile.ZipFile(self.levels_path) as z:
+                            z.extractall(real_levels_path)
+                        atexit.register(lambda tmpdir: tmpdir.cleanup(), tmpdir)
+                    else:
+                        real_levels_path = Path(self.levels_path)
+                    self.levels_files = sorted(
+                        [
+                            file
+                            for file in real_levels_path.iterdir()
+                            if (not str(file.name).startswith("."))
+                            and file.is_file()
+                            and file.suffix == ".tmx"
+                        ]
+                    )
+                except OSError as err:
+                    die(_("Error reading levels: {}").format(err.strerror))
+                self.num_levels = len(self.levels_files)
+                if self.num_levels == 0:
+                    die(_("Could not find any levels"))
+                for level in self.levels_files:
+                    self.map_timestamp[level] = 0
+                    self.load_level(level)
 
         # Main loop
         try:
