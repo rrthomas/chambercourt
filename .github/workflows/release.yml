@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deadsnakes PPA (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
         uses: deadsnakes/action@v3.2.0
         with:
           python-version: "3.12"
@@ -39,7 +39,7 @@ jobs:
       matrix:
         # Use oldest available macOS and Ubuntu for greatest compatibility
         # of resulting binary.
-        os: [ubuntu-20.04, macos-13, macos-latest, windows-latest]
+        os: [ubuntu-20.04, macos-13, macos-latest, windows-latest, ubuntu-22.04-arm]
     runs-on: ${{ matrix.os }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install non-Python build dependencies (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: sudo apt-get -y install gettext
       - name: Install non-Python build dependencies (macOS)
         if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
@@ -68,7 +68,7 @@ jobs:
       - name: Build
         run: make dist
       - name: Build the executable (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: |
           pip install pyinstaller
           PYTHONPATH=. pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --copy-metadata chambercourt --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
