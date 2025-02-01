@@ -1,36 +1,28 @@
 # Makefile for maintainer tasks
 
-po/chambercourt.pot: po/chambercourt.pot.in
-	sed -e s/VERSION/$$(grep version pyproject.toml | grep -o "[0-9.]\+")/ < $^ > $@
+PACKAGE=$(shell toml get --toml-path pyproject.toml "tool.setuptools.packages[0]")
 
-update-pot:
+po/$(PACKAGE).pot.in:
 	mkdir -p po
-	find chambercourt -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=chambercourt --output=po/chambercourt.pot.in
-	$(MAKE) po/chambercourt.pot
+	find $(PACKAGE) -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=$(PACKAGE) --output=po/$(PACKAGE).pot.in
+	$(MAKE) po/$(PACKAGE).pot
+
+po/$(PACKAGE).pot: po/$(PACKAGE).pot.in
+	sed -e s/VERSION/$$(grep version pyproject.toml | grep -o "[0-9.]\+")/ < $^ > $@
 
 update-po:
 	rm -f po/*.po
 	wget --recursive --level=1 --no-directories \
 			--accept=po --directory-prefix=po --no-verbose \
-			https://translationproject.org/latest/chambercourt/
+			https://translationproject.org/latest/$(PACKAGE)/
 
 compile-po:
-	for po in po/*.po; do mo=chambercourt/locale/$$(basename $${po%.po})/LC_MESSAGES/chambercourt.mo; mkdir -p $$(dirname $$mo); msgfmt --output-file=$$mo $$po; done
+	for po in po/*.po; do mo=$(PACKAGE)/locale/$$(basename $${po%.po})/LC_MESSAGES/$(PACKAGE).mo; mkdir -p $$(dirname $$mo); msgfmt --output-file=$$mo $$po; done
 
 update-pofiles:
-	$(MAKE) update-pot
-	$(MAKE) po/chambercourt.pot
+	$(MAKE) po/$(PACKAGE).pot
 	$(MAKE) update-po
 	$(MAKE) compile-po
-
-announce-pot:
-	woger translationproject \
-		package=$(toml get --toml-path pyproject.toml "tool.setuptools.packages[0]") \
-		package_name=$(toml get --toml-path pyproject.toml project.name) \
-		version=$(toml get --toml-path pyproject.toml project.version) \
-		home=$(toml get --toml-path pyproject.toml project.urls.Homepage) \
-		release_url=https://github.com/rrthomas/chambercourt/releases/download/v$version/$package-$version.tar.gz \
-		description=$(toml get --toml-path pyproject.toml project.description)
 
 build:
 	$(MAKE) update-pofiles
@@ -53,6 +45,6 @@ release:
 	git push --tags
 
 loc:
-	cloc --exclude-content="ptext module" chambercourt/*.py
+	cloc --exclude-content="ptext module" $(PACKAGE)/*.py
 
 .PHONY: dist build
