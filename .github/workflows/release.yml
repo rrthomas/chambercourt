@@ -13,13 +13,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install Python (Windows, macOS)
-        uses: actions/setup-python@v5
-        if: ${{ matrix.os != 'ubuntu-20.04' }}
-        with:
-          python-version: "3.12"
-      - name: Install deadsnakes PPA (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
+      - name: Install deadsnakes PPA
         uses: deadsnakes/action@v3.2.0
         with:
           python-version: "3.12"
