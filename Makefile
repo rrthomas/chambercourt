@@ -5,7 +5,6 @@ PACKAGE=$(shell toml get --toml-path pyproject.toml "tool.setuptools.packages[0]
 po/$(PACKAGE).pot.in:
 	mkdir -p po
 	find $(PACKAGE) -name "*.py" | xargs xgettext --add-comments=TRANSLATORS --from-code=utf-8 --default-domain=$(PACKAGE) --output=po/$(PACKAGE).pot.in
-	$(MAKE) po/$(PACKAGE).pot
 
 po/$(PACKAGE).pot: po/$(PACKAGE).pot.in
 	sed -e s/VERSION/$$(grep version pyproject.toml | grep -o "[0-9.]\+")/ < $^ > $@
