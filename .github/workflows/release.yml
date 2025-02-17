@@ -13,10 +13,6 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install deadsnakes PPA
-        uses: deadsnakes/action@v3.2.0
-        with:
-          python-version: "3.12"
       - name: Install non-Python build dependencies
         run: sudo apt-get -y install gettext
       - name: Install Python dependencies
