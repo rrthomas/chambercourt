@@ -5,12 +5,18 @@
   <image width="16" height="16" source="Gap.png"/>
  </tile>
  <tile id="10" type="brick">
+  <properties>
+   <property name="solid" type="bool" value="true"/>
+  </properties>
   <image width="16" height="16" source="Brick.png"/>
  </tile>
  <tile id="17" type="hero">
   <image width="16" height="16" source="Hero.png"/>
  </tile>
  <tile id="19" type="jewel">
+  <properties>
+   <property name="scoring" type="bool" value="true"/>
+  </properties>
   <image width="16" height="16" source="Diamond.png"/>
  </tile>
 </tileset>
