@@ -21,6 +21,7 @@ from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any
 
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
@@ -440,6 +441,35 @@ Game instructions go here.
         self.restart_level()
         self.save_position()
 
+    def _get_gid_properties(self, gid: int) -> dict[str, Any]:
+        """Look up the properties of a tile given its gid."""
+        return self.map_data.tmx.get_tile_properties_by_gid(gid)
+
+    def get_tile_properties(self, tile: Tile) -> dict[str, Any]:
+        """Look up the properties of a tile given its `Tile`."""
+        return self._get_gid_properties(self._gids[tile])
+
+    def get_properties(self, pos: Vector2) -> dict[str, Any]:
+        """Return the properties of the tile at the given position.
+
+        Args:
+            pos (Vector2): the `(x, y)` position required, in tile
+              coordinates
+
+        Returns:
+            dict: the properties dict.
+        """
+        # Anything outside the map is a default tile
+        x, y = int(pos.x), int(pos.y)
+        if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
+            return self.get_tile_properties(self.default_tile)
+        gid = self._map_tiles[y][x]  # pyright: ignore
+        if gid == 0:  # Missing tiles are gaps
+            return self.get_tile_properties(self.empty_tile)
+        return self._get_gid_properties(gid)
+
+    # TODO: Inline, and try to use the properties dict,
+    # i.e. try to avoid calling `tile_constructor`.
     def get(self, pos: Vector2) -> Tile:
         """Return the tile at the given position.
 
@@ -450,16 +480,7 @@ Game instructions go here.
         Returns:
             Tile: the `Tile` at the given position
         """
-        # Anything outside the map is a default tile
-        x, y = int(pos.x), int(pos.y)
-        if not ((0 <= x < self.level_width) and (0 <= y < self.level_height)):
-            return self.default_tile
-        block = self._map_tiles[y][x]  # pyright: ignore
-        if block == 0:  # Missing tiles are gaps
-            return self.empty_tile
-        properties = self.map_data.tmx.get_tile_properties(x, y, 0)
-        assert type(properties) is dict
-        return self.tile_constructor(properties["type"])
+        return self.tile_constructor(self.get_properties(pos)["type"])
 
     def _set(self, pos: Vector2, tile: Tile) -> None:
         x, y = int(pos.x), int(pos.y)
