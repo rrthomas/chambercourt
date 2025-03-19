@@ -645,7 +645,7 @@ Game instructions go here.
     def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
         """Show instructions and choose start level."""
         clear_keys()
-        level = 0
+        level = None
         clock = pygame.time.Clock()
         start_level_y = (
             self.instructions_y
@@ -673,7 +673,7 @@ Game instructions go here.
             self.print_screen(
                 (0, start_level_y),
                 _("Start level: {}/{}").format(
-                    1 if level == 0 else level, self.num_levels
+                    1 if level is None else level, self.num_levels
                 ),
                 width=self.surface.get_width(),
                 align="center",
@@ -681,6 +681,7 @@ Game instructions go here.
             pygame.display.flip()
             handle_quit_event()
             for event in pygame.event.get():
+                level_change = 0
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         quit_game()
@@ -692,18 +693,18 @@ Game instructions go here.
                         pygame.K_SLASH,
                         pygame.K_DOWN,
                     ):
-                        level -= 1
+                        level_change = -1
                     elif event.key in (
                         pygame.K_x,
                         pygame.K_RIGHT,
                         pygame.K_QUOTE,
                         pygame.K_UP,
                     ):
-                        level += 1
+                        level_change = 1
                     elif event.key in DIGIT_KEYS:
-                        level = min(self.num_levels, level * 10 + DIGIT_KEYS[event.key])
+                        level = min(self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key])
                     else:
-                        level = 0
+                        level = None
                     handle_global_keys(event)
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 0:
@@ -711,10 +712,11 @@ Game instructions go here.
                 elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
                     self.handle_joystick_plug(event)
                 (dx, dy) = self.handle_joysticks()
-                level += dx - dy
-                level = max(1, min(self.num_levels, level))
+                level_change += dx - dy
+                if level_change != 0:
+                    level = max(1, min(self.num_levels, (level or 1) + level_change))
             clock.tick(self.frames_per_second)
-        return max(min(level, self.num_levels), 1)
+        return max(min(level or 1, self.num_levels), 1)
 
     def end_game(self) -> None:
         """Do any game-specific tear-down when the game ends."""
