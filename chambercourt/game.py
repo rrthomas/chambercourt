@@ -870,7 +870,7 @@ Game instructions go here.
             delta (Vector2): the displacement unit vector
 
         Returns:
-            bool: `True` if the player has moved in that direction, or
+            bool: `True` if the player can move in that direction, or
               `False` otherwise.
 
         The default rule is that the player may not move on to
