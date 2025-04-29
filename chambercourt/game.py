@@ -22,7 +22,7 @@ from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, cast
 
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
@@ -444,7 +444,7 @@ Game instructions go here.
 
     def _get_gid_properties(self, gid: int) -> dict[str, Any]:
         """Look up the properties of a tile given its gid."""
-        return self.map_data.tmx.get_tile_properties_by_gid(gid)
+        return cast(dict[str, Any], self.map_data.tmx.get_tile_properties_by_gid(gid))
 
     def get_tile_properties(self, tile: Tile) -> dict[str, Any]:
         """Look up the properties of a tile given its `Tile`."""
