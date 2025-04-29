@@ -43,7 +43,7 @@ def die(msg: str, code: int | None = 1) -> NoReturn:
 
     Args:
         msg (str): the error message
-        code (int | None, optional): . Defaults to 1.
+        code (int | None): Defaults to 1.
     """
     warn(msg)
     sys.exit(code)

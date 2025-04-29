@@ -377,12 +377,12 @@ Game instructions go here.
         """Wrapper for pygame_image_loader for ChamberCourt assets.
 
         Args:
-            filename (Path): asset name; only the basename is used
-            colorkey (Optional[ColorLike]): as for `pygame_image_loader`
+            filename (str): asset name; only the basename is used
+            colorkey (ColorLike | None): as for `pygame_image_loader`
             kwargs (dict): as for `pygame_image_loader`.
 
         Returns:
-            Callable[[Rect, int], TiledElement]: _description_
+            Callable[[Rect, int], pygame.Surface]: _description_
         """
         return pygame_image_loader(
             str(self.find_asset(Path(filename).name)), colorkey, **kwargs
@@ -458,7 +458,7 @@ Game instructions go here.
               coordinates
 
         Returns:
-            dict: the properties dict.
+            dict[str, Any]: the properties dict.
         """
         # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
@@ -653,7 +653,7 @@ Game instructions go here.
         """Convert game grid to screen coordinates.
 
         Args:
-            pos (tuple[int, int]): grid coordinates
+            pos (Vector2): grid coordinates
 
         Returns:
             tuple[int, int]: the corresponding screen coordinates

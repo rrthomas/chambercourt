@@ -15,7 +15,7 @@ def main(argv: list[str] = sys.argv[1:]) -> None:
     """Main function for ChamberCourt bare-bones demo game.
 
     Args:
-        argv (str, optional): command-line parameters. Defaults to
+        argv (list[str]): command-line parameters. Defaults to
           sys.argv[1:].
     """
     ChambercourtGame().main(argv)
