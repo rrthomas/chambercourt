@@ -1,6 +1,7 @@
 """ChamberCourt 2D grid game framework, based on PyGame.
 
 © Reuben Thomas <rrt@sc3d.org> 2024
+
 Released under the GPL version 3, or (at your option) any later version.
 """
 
