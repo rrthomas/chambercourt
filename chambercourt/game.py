@@ -1042,7 +1042,7 @@ or arrow keys or joystick to move
                     + "\n"
                     + _("""\
 S/Button A - Save position
-L/Button B - Save position
+L/Button B - Load position
 R/Button Y - Restart level
 Q - Quit game
 F - toggle full screen
