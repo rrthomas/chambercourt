@@ -989,6 +989,10 @@ Game instructions go here.
                 self.fallback_path = Path(fallback_path)
                 self.levels_path = Path(args.levels or self.app_path / "levels")
 
+                # Check pygame is built with all image loaders
+                if not pygame.image.get_extended():
+                    die(_("pygame does not have extended image format support"))
+
                 # Initialize pygame
                 pygame.init()
                 self.load_assets()
