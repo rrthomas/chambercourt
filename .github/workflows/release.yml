@@ -29,7 +29,7 @@ jobs:
       matrix:
         # Use oldest available macOS and Ubuntu for greatest compatibility
         # of resulting binary.
-        os: [ubuntu-20.04, macos-13, macos-latest, windows-latest, ubuntu-22.04-arm]
+        os: [ubuntu-20.04, macos-14, windows-latest, ubuntu-22.04-arm]
     runs-on: ${{ matrix.os }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -43,7 +43,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: sudo apt-get -y install gettext
       - name: Install non-Python build dependencies (macOS)
-        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-14' }}
         run: |
           brew install make
           echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
@@ -64,7 +64,7 @@ jobs:
           PYTHONPATH=. pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --copy-metadata chambercourt --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
           ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }} --help
       - name: Build the executable (macOS)
-        if: ${{ matrix.os == 'macos-13' || matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-14' }}
         run: |
           pip install pyinstaller
           ./make-macos-icns ./chambercourt/levels/Hero.png chambercourt.iconset
