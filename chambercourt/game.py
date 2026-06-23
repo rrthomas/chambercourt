@@ -698,8 +698,10 @@ Game instructions go here.
         """
         origin = self._map_layer.get_center_offset()
         return Vector2(
-            (pos[0] - origin[0] - self.window_pos[0]) // self.tile_width,
-            (pos[1] - origin[1] - self.window_pos[1]) // self.tile_height,
+            ((pos[0] - self.window_pos[0]) // self.window_scale - origin[0])
+            // self.tile_width,
+            ((pos[1] - self.window_pos[1]) // self.window_scale - origin[1])
+            // self.tile_height,
         )
 
     async def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
