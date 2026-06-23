@@ -32,7 +32,15 @@ requires = ["build", "setuptools >= 62.3.0"]
 packages = ["chambercourt"]
 
 [tool.setuptools.package-data]
-chambercourt = ["**/*.png", "**/*.wav", "**/*.tmx", "**/*.tsx", "**/*.ttf", "**/*.mo", "py.typed"]
+chambercourt = [
+    "**/*.png",
+    "**/*.wav",
+    "**/*.tmx",
+    "**/*.tsx",
+    "**/*.ttf",
+    "**/*.mo",
+    "py.typed",
+]
 
 [tool.pyright]
 ignore = ["chambercourt/ptext.py"]
