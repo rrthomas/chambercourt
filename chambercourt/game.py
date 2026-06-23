@@ -727,6 +727,8 @@ Game instructions go here.
                         level = min(
                             self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key]
                         )
+                        if level == 0:
+                            level = None
                     else:
                         level = None
                     handle_global_keys(event)
