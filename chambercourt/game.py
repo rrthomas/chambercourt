@@ -126,6 +126,7 @@ class Game[Tile: StrEnum]:
         self.empty_tile = empty_tile
         self.default_tile = default_tile
 
+        self.clock = pygame.time.Clock()
         self.num_levels: int
         self.levels_files: list[Path]
         self.hero_image: pygame.Surface
@@ -668,7 +669,6 @@ Game instructions go here.
         """Show instructions and choose start level."""
         clear_keys()
         level = None
-        clock = pygame.time.Clock()
         start_level_y = (
             self.instructions_y
             + len(instructions.split("\n\n\n", maxsplit=1)[0].split("\n"))
@@ -741,7 +741,7 @@ Game instructions go here.
                 level_change += dx - dy
                 if level_change != 0:
                     level = max(1, min(self.num_levels, (level or 1) + level_change))
-            clock.tick(self.frames_per_second)
+            self.clock.tick(self.frames_per_second)
         return max(min(level or 1, self.num_levels), 1)
 
     def end_game(self) -> None:
@@ -773,9 +773,8 @@ Game instructions go here.
         min_radius = max(self.tile_width, self.tile_height) / 2 + 1
         radius_range = max_radius - min_radius
         spotlight = pygame.Surface((self.window_pixel_width, self.window_pixel_height))
-        clock = pygame.time.Clock()
         for i in range(self.frames_per_second):
-            clock.tick(self.frames_per_second)
+            self.clock.tick(self.frames_per_second)
             spotlight.fill(Color("black"))
             radius = max_radius - ((i + 1) / self.frames_per_second) ** 2 * radius_range
             pygame.draw.circle(spotlight, Color("white"), origin, radius)
@@ -793,9 +792,8 @@ Game instructions go here.
         destination = Vector2(0, 0)
         delta = destination - origin
         radius_range = max_radius - min_radius
-        clock = pygame.time.Clock()
         for i in range(self.frames_per_second):
-            clock.tick(self.frames_per_second)
+            self.clock.tick(self.frames_per_second)
             factor = ((i + 1) / self.frames_per_second) ** 2
             radius = min_radius + radius_range * factor
             zoomed_hero = pygame.transform.scale(
@@ -814,7 +812,6 @@ Game instructions go here.
         """
         self.quit = False
         self.level = level
-        clock = pygame.time.Clock()
         while not self.quit and self.level <= self.num_levels:
             self.start_level()
             while not self.quit and not self.finished():
@@ -828,7 +825,7 @@ Game instructions go here.
                 while not self.quit and not (
                     self.finished() and (frame == 0 or not moving)
                 ):
-                    clock.tick(self.frames_per_second)
+                    self.clock.tick(self.frames_per_second)
 
                     # Check inputs
                     for event in pygame.event.get():
