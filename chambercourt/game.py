@@ -28,7 +28,7 @@ from typing import Any, cast
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
 
-from .event import handle_global_keys, handle_quit_event, quit_game
+from .event import handle_global_inputs, handle_quit_event, quit_game
 from .langdetect import language_code
 from .warnings_util import die, simple_warning
 
@@ -598,6 +598,8 @@ Game instructions go here.
                     dy = -1
                 elif ud > 0.5:
                     dy = 1
+        if (dy, dy) != (0, 0):
+            pygame.mouse.set_visible(False)
         return (dx, dy)
 
     def handle_game_keys(self, event: pygame.event.Event) -> None:
@@ -737,12 +739,12 @@ Game instructions go here.
                             level = None
                     else:
                         level = None
-                    handle_global_keys(event)
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 0:
                         play = True
                 elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
                     self.handle_joystick_plug(event)
+                handle_global_inputs(event)
                 (dx, dy) = self.handle_joysticks()
                 level_change += dx - dy
                 if level_change != 0:
@@ -838,9 +840,9 @@ Game instructions go here.
                         if event.type == pygame.QUIT:
                             quit_game()
                         elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
-                            handle_global_keys(event)
                             self.handle_game_keys(event)
                         self.handle_joystick_plug(event)
+                        handle_global_inputs(event)
                     (dx, dy) = self.handle_player_controls()
 
                     # If Hero is not moving already, try to start new move

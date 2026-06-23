@@ -30,8 +30,21 @@ def handle_quit_event() -> None:
         quit_game()
 
 
-def handle_global_keys(event: pygame.event.Event) -> None:
-    """React to keypresses that work anywhere in the game."""
+def handle_global_inputs(event: pygame.event.Event) -> None:
+    """React to inputs that work anywhere in the game.
+
+    Args:
+        event (pygame.event.Event): An event.
+    """
     if event.type == pygame.KEYDOWN:
         if event.key == pygame.K_f:
             pygame.display.toggle_fullscreen()
+
+    if event.type in (
+        pygame.MOUSEMOTION,
+        pygame.MOUSEBUTTONDOWN,
+        pygame.MOUSEWHEEL,
+    ):
+        pygame.mouse.set_visible(True)
+    elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
+        pygame.mouse.set_visible(False)
