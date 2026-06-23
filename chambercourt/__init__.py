@@ -1,4 +1,4 @@
-"""ChamberCourt 2D grid game framework, based on PyGame.
+"""ChamberCourt 2D grid game framework, based on Pygame-ce.
 
 © Reuben Thomas <rrt@sc3d.org> 2024
 

@@ -5,7 +5,7 @@ https://github.com/rrthomas/chambercourt
 by Reuben Thomas <rrt@sc3d.org>  
 
 ChamberCourt is a framework for simple 2-D grid-based games, based on
-[PyGame](https://pygame.org).
+[Pygame-ce](https://pyga.me).
 
 It is only intended for use by the author, mostly to resurrect a bunch of
 old games he wrote a long time ago. I welcome help to make it more generally

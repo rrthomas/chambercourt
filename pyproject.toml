@@ -1,7 +1,7 @@
 [project]
 name = "ChamberCourt"
 version = "0.9.27.2"
-description = "Simple 2D grid game framework based on PyGame"
+description = "Simple 2D grid game framework based on Pygame-ce"
 license = {text = "GPL v3 or later"}
 authors = [{name = "Reuben Thomas", email = "rrt@sc3d.org"}]
 readme = "README.md"
@@ -10,7 +10,7 @@ requires-python = ">= 3.12"
 dependencies = [
     "i18nparse",
     "platformdirs",
-    "pygame >= 2.0.0",
+    "pygame-ce >= 2.5.7",
     "pyscroll",
     "pytmx",
 ]

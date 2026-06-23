@@ -1074,6 +1074,9 @@ class Hero(pygame.sprite.Sprite):
         pygame (pygame.sprite.Sprite): the sprite used for the hero.
     """
 
+    # FIXME: we don't want to have to assert that Hero.rect and Hero.image are not None
+    # This should be fixed by https://github.com/pygame-community/pygame-ce/pull/3572
+
     def __init__(self, image: pygame.Surface) -> None:
         """Create a Hero object.
 
@@ -1081,10 +1084,10 @@ class Hero(pygame.sprite.Sprite):
             image (pygame.Surface): the hero image
         """
         pygame.sprite.Sprite.__init__(self)
-        self.image = image
+        self.image: pygame.Surface = image
         self.velocity = Vector2(0, 0)
         self.position = Vector2(0, 0)
-        self.rect = self.image.get_rect()
+        self.rect: Rect = self.image.get_rect()
         self.tile_size = Vector2(self.image.get_width(), self.image.get_height())
 
     def update(self, dt: float) -> None:
