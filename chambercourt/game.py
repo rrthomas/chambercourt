@@ -557,8 +557,8 @@ Game instructions go here.
 
     async def clock_tick(self) -> None:
         """Let clock tick for a frame."""
-        await asyncio.sleep(0)
         self.clock.tick(self.frames_per_second)
+        await asyncio.sleep(0)
 
     def draw(self) -> None:
         """Draw the current position."""
