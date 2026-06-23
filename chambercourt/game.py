@@ -554,6 +554,10 @@ Game instructions go here.
             self.init_renderer()
             self.init_game()
 
+    def clock_tick(self) -> None:
+        """Let clock tick for a frame."""
+        self.clock.tick(self.frames_per_second)
+
     def draw(self) -> None:
         """Draw the current position."""
         self._group.center(self.hero.rect.center)
@@ -741,7 +745,7 @@ Game instructions go here.
                 level_change += dx - dy
                 if level_change != 0:
                     level = max(1, min(self.num_levels, (level or 1) + level_change))
-            self.clock.tick(self.frames_per_second)
+            self.clock_tick()
         return max(min(level or 1, self.num_levels), 1)
 
     def end_game(self) -> None:
@@ -774,7 +778,7 @@ Game instructions go here.
         radius_range = max_radius - min_radius
         spotlight = pygame.Surface((self.window_pixel_width, self.window_pixel_height))
         for i in range(self.frames_per_second):
-            self.clock.tick(self.frames_per_second)
+            self.clock_tick()
             spotlight.fill(Color("black"))
             radius = max_radius - ((i + 1) / self.frames_per_second) ** 2 * radius_range
             pygame.draw.circle(spotlight, Color("white"), origin, radius)
@@ -793,7 +797,7 @@ Game instructions go here.
         delta = destination - origin
         radius_range = max_radius - min_radius
         for i in range(self.frames_per_second):
-            self.clock.tick(self.frames_per_second)
+            self.clock_tick()
             factor = ((i + 1) / self.frames_per_second) ** 2
             radius = min_radius + radius_range * factor
             zoomed_hero = pygame.transform.scale(
@@ -825,7 +829,7 @@ Game instructions go here.
                 while not self.quit and not (
                     self.finished() and (frame == 0 or not moving)
                 ):
-                    self.clock.tick(self.frames_per_second)
+                    self.clock_tick()
 
                     # Check inputs
                     for event in pygame.event.get():
