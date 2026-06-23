@@ -26,7 +26,7 @@ classifiers = [
 chambercourt = "chambercourt:main"
 
 [build-system]
-requires = ["build", "setuptools >= 62.3.0"]
+requires = ["build", "setuptools"]
 
 [tool.setuptools]
 packages = ["chambercourt"]
