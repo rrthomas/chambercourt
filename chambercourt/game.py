@@ -6,6 +6,7 @@ Released under the GPL version 3, or (at your option) any later version.
 """
 
 import argparse
+import asyncio
 import atexit
 import copy
 import gettext
@@ -554,8 +555,9 @@ Game instructions go here.
             self.init_renderer()
             self.init_game()
 
-    def clock_tick(self) -> None:
+    async def clock_tick(self) -> None:
         """Let clock tick for a frame."""
+        await asyncio.sleep(0)
         self.clock.tick(self.frames_per_second)
 
     def draw(self) -> None:
@@ -669,7 +671,7 @@ Game instructions go here.
             origin[1] + int(pos.y) * self.tile_height,
         )
 
-    def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
+    async def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
         """Show instructions and choose start level."""
         clear_keys()
         level = None
@@ -745,7 +747,7 @@ Game instructions go here.
                 level_change += dx - dy
                 if level_change != 0:
                     level = max(1, min(self.num_levels, (level or 1) + level_change))
-            self.clock_tick()
+            await self.clock_tick()
         return max(min(level or 1, self.num_levels), 1)
 
     def end_game(self) -> None:
@@ -765,7 +767,7 @@ Game instructions go here.
         `self.hero.velocity`.
         """
 
-    def end_level(self) -> None:
+    async def end_level(self) -> None:
         """End a level."""
         if self.level == self.num_levels:
             return
@@ -778,7 +780,7 @@ Game instructions go here.
         radius_range = max_radius - min_radius
         spotlight = pygame.Surface((self.window_pixel_width, self.window_pixel_height))
         for i in range(self.frames_per_second):
-            self.clock_tick()
+            await self.clock_tick()
             spotlight.fill(Color("black"))
             radius = max_radius - ((i + 1) / self.frames_per_second) ** 2 * radius_range
             pygame.draw.circle(spotlight, Color("white"), origin, radius)
@@ -787,7 +789,7 @@ Game instructions go here.
             self.game_surface.blit(spotlight, (0, 0), special_flags=pygame.BLEND_MIN)
             self.show_screen()
 
-    def win_game(self) -> None:
+    async def win_game(self) -> None:
         """Win the game."""
         self._group.remove(self.hero)
         max_radius = min(self.window_pixel_width, self.window_pixel_height) / 2
@@ -797,7 +799,7 @@ Game instructions go here.
         delta = destination - origin
         radius_range = max_radius - min_radius
         for i in range(self.frames_per_second):
-            self.clock_tick()
+            await self.clock_tick()
             factor = ((i + 1) / self.frames_per_second) ** 2
             radius = min_radius + radius_range * factor
             zoomed_hero = pygame.transform.scale(
@@ -808,7 +810,7 @@ Game instructions go here.
             self.show_screen()
         pygame.time.wait(2000)
 
-    def run(self, level: int) -> None:
+    async def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
 
         Args:
@@ -829,7 +831,7 @@ Game instructions go here.
                 while not self.quit and not (
                     self.finished() and (frame == 0 or not moving)
                 ):
-                    self.clock_tick()
+                    await self.clock_tick()
 
                     # Check inputs
                     for event in pygame.event.get():
@@ -870,10 +872,10 @@ Game instructions go here.
                     self.show_screen()
                 self.stop_play()
             if self.finished():
-                self.end_level()
+                await self.end_level()
                 self.level += 1
         if self.level > self.num_levels:
-            self.win_game()
+            await self.win_game()
         self.end_game()
 
     def init_game(self) -> None:
@@ -945,7 +947,7 @@ Game instructions go here.
                     return False
         return True
 
-    def main(self, argv: list[str]) -> None:
+    async def main(self, argv: list[str]) -> None:
         """Main function for the game.
 
         Args:
@@ -1039,7 +1041,7 @@ Game instructions go here.
         # Main loop
         try:
             while True:
-                level = self.title_screen(
+                level = await self.title_screen(
                     self.title_image.convert(),
                     # TRANSLATORS: Please keep this text wrapped to 40 characters.
                     self.instructions()
@@ -1065,7 +1067,7 @@ F - toggle full screen
 Press the space bar or button A to play!
 """),
                 )
-                self.run(level)
+                await self.run(level)
         except KeyboardInterrupt:
             quit_game()
 

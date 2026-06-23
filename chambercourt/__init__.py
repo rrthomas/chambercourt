@@ -5,6 +5,7 @@
 Released under the GPL version 3, or (at your option) any later version.
 """
 
+import asyncio
 import re
 import sys
 
@@ -18,7 +19,7 @@ def main(argv: list[str] = sys.argv[1:]) -> None:
         argv (list[str]): command-line parameters. Defaults to
           sys.argv[1:].
     """
-    ChambercourtGame().main(argv)
+    asyncio.run(ChambercourtGame().main(argv))
 
 
 if __name__ == "__main__":
