@@ -724,7 +724,9 @@ Game instructions go here.
                     ):
                         level_change = 1
                     elif event.key in DIGIT_KEYS:
-                        level = min(self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key])
+                        level = min(
+                            self.num_levels, (level or 0) * 10 + DIGIT_KEYS[event.key]
+                        )
                     else:
                         level = None
                     handle_global_keys(event)
