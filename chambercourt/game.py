@@ -137,7 +137,7 @@ class Game[Tile: StrEnum]:
         self.window_pixel_height: int
         self.window_scaled_width: int
         self.window_scaled_height: int
-        self.window_pos = (0, 0)
+        self.window_pos: tuple[int, int] = (0, 0)
         self.game_surface: pygame.Surface
         self.quit = False
         self.level = 1
@@ -644,6 +644,7 @@ Game instructions go here.
         This handles all supported input devices.
         """
         pressed = pygame.key.get_pressed()
+        mouse_pressed = pygame.mouse.get_pressed()
         dx, dy = (0, 0)
         if pressed[pygame.K_LEFT] or pressed[pygame.K_z]:
             dx -= 1
@@ -653,6 +654,19 @@ Game instructions go here.
             dy -= 1
         if pressed[pygame.K_DOWN] or pressed[pygame.K_SLASH]:
             dy += 1
+        if mouse_pressed[0]:
+            mpos = self.window_to_game(pygame.mouse.get_pos())
+            mdx, mdy = (0, 0)
+            if mpos.x > self.hero.position.x:
+                mdx = 1
+            elif mpos.x < self.hero.position.x:
+                mdx = -1
+            if mpos.y > self.hero.position.y:
+                mdy = 1
+            elif mpos.y < self.hero.position.y:
+                mdy = -1
+            if (mdx, mdy) != (0, 0):
+                (dx, dy) = (mdx, mdy)
         (jdx, jdy) = self.handle_joysticks()
         if (jdx, jdy) != (0, 0):
             (dx, dy) = (jdx, jdy)
@@ -671,6 +685,21 @@ Game instructions go here.
         return (
             origin[0] + int(pos.x) * self.tile_width,
             origin[1] + int(pos.y) * self.tile_height,
+        )
+
+    def window_to_game(self, pos: tuple[int, int]) -> Vector2:
+        """Convert window coordinates to game grid.
+
+        Args:
+            pos (tuple[int, int]): screen coordinates
+
+        Returns:
+            Vector2: the corresponding game grid coordinates
+        """
+        origin = self._map_layer.get_center_offset()
+        return Vector2(
+            (pos[0] - origin[0] - self.window_pos[0]) // self.tile_width,
+            (pos[1] - origin[1] - self.window_pos[1]) // self.tile_height,
         )
 
     async def title_screen(self, title_image: pygame.Surface, instructions: str) -> int:
