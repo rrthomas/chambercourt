@@ -7,9 +7,11 @@
 
 from __future__ import division, print_function
 
-from math import ceil, sin, cos, radians, exp
 from collections import namedtuple
+from math import ceil, cos, exp, radians, sin
+
 import pygame
+
 
 # Global default values
 DEFAULT_FONT_SIZE = 24
@@ -887,17 +889,17 @@ def _breaktext(text, width, font, canbreakatstart=False):
         if c in [" ", "-"]:
             atbreak = True
         # Non-breaking space. No breakpoint here. Instead just add a space.
-        elif c == "\u00A0":
+        elif c == "\u00a0":
             c = " "
         # Non-breaking hyphen. No breakpoint here. Instead just add a hyphen.
         elif c == "\u2011":
             c = "-"
         # Zero-width space. Allow a breakpoint but don't add anything (i.e. remove this character)
-        elif c == "\u200B":
+        elif c == "\u200b":
             atbreak = True
             c = ""
         # Soft hyphen. Allow a breakpoint with an appending string of hyphen ("-").
-        elif c == "\u00AD":
+        elif c == "\u00ad":
             atbreak = True
             c = ""
             napp = "-"
