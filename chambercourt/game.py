@@ -68,7 +68,7 @@ SAVED_POSITION_FILE = DATA_DIR / "saved_position.pkl"
 
 def clear_keys() -> None:
     """Discard outstanding keypress events."""
-    for _event in pygame.event.get(pygame.KEYDOWN):
+    for _ in pygame.event.get(pygame.KEYDOWN):
         pass
 
 
