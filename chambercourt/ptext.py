@@ -975,7 +975,9 @@ def _wrap(text, **kwargs):
             options.colortag,
         )
         textandtags = list(_splitbytags(para, tagspec0, options.color, *tagargs))
-        _, tagspec0 = textandtags[-1]
+        # Update tagspec state if there are tags on this line
+        if len(textandtags) > 0:
+            _, tagspec0 = textandtags[-1]
         for line, linewidth in _wrapline(textandtags, options.width, getfontbytagspec):
             if not line:
                 jline += 1
