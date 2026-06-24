@@ -1,6 +1,6 @@
 """ChamberCourt: Main game class.
 
-© Reuben Thomas <rrt@sc3d.org> 2024-2025
+© Reuben Thomas <rrt@sc3d.org> 2024-2026
 
 Released under the GPL version 3, or (at your option) any later version.
 """
@@ -340,7 +340,27 @@ Game instructions go here.
         """
         return (pos[0] * self.font_pixels, pos[1] * self.font_pixels)
 
-    def print_screen(self, pos: tuple[int, int], msg: str, **kwargs) -> None:
+    def print_screen_raw(self, pos: tuple[int, int], msg: str, **kwargs) -> tuple[int, int]:
+        """Print text on the screen at the given pixel coordinates.
+
+        Args:
+            pos (tuple[int, int]): an `(x, y)` pair of pixel coordinates
+            msg (str): the text to print
+            kwargs: keyword arguments to `ptext.draw`
+
+        Returns:
+            tuple[int, int]: the position at which the text is drawn
+        """
+        _, pos = ptext.draw(  # type: ignore[no-untyped-call]
+            msg,
+            pos,
+            fontname=self.font_path,
+            fontsize=self.font_pixels,
+            **kwargs,
+        )
+        return pos
+
+    def print_screen(self, pos: tuple[int, int], msg: str, **kwargs) -> tuple[int, int]:
         """Print text on the screen at the given text character coordinates.
 
         A monospaced font is assumed.
@@ -349,14 +369,30 @@ Game instructions go here.
             pos (tuple[int, int]): an `(x, y)` pair of character cell coordinates
             msg (str): the text to print
             kwargs: keyword arguments to `ptext.draw`
+
+        Returns:
+            tuple[int, int]: the position at which the text is drawn
         """
-        ptext.draw(  # type: ignore[no-untyped-call]
-            msg,
+        return self.print_screen_raw(
             self.text_to_screen(pos),
-            fontname=self.font_path,
-            fontsize=self.font_pixels,
+            msg,
             **kwargs,
         )
+
+    def text_width(self, text: str, **kwargs) -> int:
+        """Find the width of given text.
+
+        Args:
+            text (str): the text
+            kwargs: tag definitions as for `ptext.draw`
+
+        Returns:
+            int: the width in pixels of the text
+        """
+        kwargs["fontname"] = self.font_path
+        kwargs["fontsize"] = self.font_pixels
+        wrapped = ptext._wrap(text, **kwargs)
+        return wrapped[0].linewidth
 
     def load_assets(self) -> None:
         """Load game assets."""
@@ -384,7 +420,7 @@ Game instructions go here.
             kwargs (dict): as for `pygame_image_loader`.
 
         Returns:
-            Callable[[Rect, int], pygame.Surface]: _description_
+            Callable[[Rect, int], pygame.Surface]: loader function
         """
         return pygame_image_loader(
             str(self.find_asset(Path(filename).name)), colorkey, **kwargs
@@ -460,7 +496,7 @@ Game instructions go here.
               coordinates
 
         Returns:
-            dict[str, Any]: the properties dict.
+            dict[str, Any]: the properties dict
         """
         # Anything outside the map is a default tile
         x, y = int(pos.x), int(pos.y)
@@ -713,6 +749,7 @@ Game instructions go here.
             + len(instructions.split("\n\n\n", maxsplit=1)[0].split("\n"))
             + 1
         )
+        play_y = start_level_y + 2
         play = False
         while not play:
             self.reinit_screen()
@@ -731,14 +768,65 @@ Game instructions go here.
                 width=self.surface.get_width(),
                 align="center",
             )
-            self.print_screen(
+
+            # FIXME: Factor out reusable routines to create a new button
+            # Draw level selector and find where the arrows are
+            level_msg = _("Start at level: ←{}→/{}").format(
+                1 if level is None else level, self.num_levels
+            )
+            left_arrow_index = level_msg.find("←")
+            right_arrow_index = level_msg.find("→")
+            arrows_y = self.print_screen(
                 (0, start_level_y),
-                _("Start level: {}/{}").format(
-                    1 if level is None else level, self.num_levels
-                ),
+                level_msg,
                 width=self.surface.get_width(),
                 align="center",
+            )[1]
+            level_msg_width = self.text_width(level_msg)
+            level_left_x = (self.surface.get_width() - level_msg_width) // 2
+            left_arrow_width = self.text_width("←")
+            right_arrow_width = self.text_width("→")
+            left_arrow_x = level_left_x + self.text_width(level_msg[:left_arrow_index + 1]) - left_arrow_width
+            right_arrow_x = level_left_x + self.text_width(level_msg[:right_arrow_index + 1]) - right_arrow_width
+            left_zone = Rect(
+                left_arrow_x,
+                arrows_y,
+                left_arrow_width,
+                self.font_pixels,
             )
+            right_zone = Rect(
+                right_arrow_x,
+                arrows_y,
+                right_arrow_width,
+                self.font_pixels,
+            )
+            self.print_screen_raw((left_arrow_x, arrows_y), "←", background="darkgrey")
+            self.print_screen_raw((right_arrow_x, arrows_y), "→", background="darkgrey")
+
+            # Draw play message and button
+            play_msg = _("Press Space or button A to play!")
+            # TRANSLATORS: this message should appear in the previous one
+            # It will be highlighted as a button.
+            play_index = play_msg.find(_("play"))
+            play_button_y = self.print_screen(
+                (0, play_y),
+                play_msg,
+                width=self.surface.get_width(),
+                align="center",
+            )[1]
+            play_msg_width = self.text_width(play_msg)
+            play_left_x = (self.surface.get_width() - play_msg_width) // 2
+            p_width = self.text_width(play_msg[0])
+            play_width = self.text_width(_("play"))
+            play_x = play_left_x + self.text_width(play_msg[:play_index + 1]) - p_width
+            play_zone = Rect(
+                play_x,
+                play_button_y,
+                play_width,
+                self.font_pixels,
+            )
+            self.print_screen_raw((play_x, play_button_y), _("play"), background="darkgrey")
+
             pygame.display.flip()
             handle_quit_event()
             for event in pygame.event.get():
@@ -770,6 +858,14 @@ Game instructions go here.
                             level = None
                     else:
                         level = None
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if left_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
+                        level_change = -1
+                    elif right_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
+                        level_change = 1
+                    elif play_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
+                        play = True
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 0:
                         play = True
@@ -1081,7 +1177,8 @@ Game instructions go here.
                     + "\n"
                     + _("""\
 Z/X - Left/Right   '/? - Up/Down
-or arrow keys or joystick to move
+or use arrow keys, game controller
+joystick, mouse or tap the screen
 """)
                     + "\n"
                     + _("""\
@@ -1091,14 +1188,6 @@ R/Button Y - Restart level
 Q - Quit game
 F - toggle full screen
 """)
-                    + "\n\n"
-                    + _("""\
-(choose with movement keys and digits)
-""")
-                    + "\n"
-                    + _("""\
-Press the space bar or button A to play!
-"""),
                 )
                 await self.run(level)
         except KeyboardInterrupt:
