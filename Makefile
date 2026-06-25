@@ -48,4 +48,4 @@ release:
 loc:
 	cloc --exclude-content="ptext module" $(PACKAGE)/*.py
 
-.PHONY: dist build
+.PHONY: dist build po/$(PACKAGE).pot.in
