@@ -261,6 +261,17 @@ Game instructions go here.
     def init_screen(self) -> None:
         """Initialise the screen."""
         self.font_pixels = 8 * self.window_scale * self.font_scale
+        info = pygame.display.Info()
+        self.screen_size = (
+            min(self.screen_size[0], info.current_w),
+            min(self.screen_size[1], info.current_h),
+        )
+        # Window can be as wide as the screen, but must leave room for the
+        # level title.
+        self.window_size = (
+            min(self.window_size[0] * self.window_scale, self.screen_size[0]) // self.window_scale,
+            min(self.window_size[1] * self.window_scale, self.screen_size[1] - self.font_pixels) // self.window_scale,
+        )
         self.screen_char_width = self.screen_size[0] // self.font_pixels
         self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
@@ -455,8 +466,8 @@ Game instructions go here.
         )
         self.window_pos = (
             (self.surface.get_width() - self.window_scaled_width) // 2,
-            (self.surface.get_height() - self.window_scaled_height) // 2
-            + 4 * self.window_scale,
+            (self.surface.get_height() - self.window_scaled_height - self.font_pixels) // 2
+            + self.font_pixels,
         )
 
         # Dict mapping tileset GIDs to map gids
