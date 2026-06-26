@@ -1,6 +1,7 @@
 name: Build release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
@@ -12,7 +13,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install non-Python build dependencies
         run: sudo apt-get -y install gettext
       - name: Install Python dependencies
@@ -29,18 +30,18 @@ jobs:
       matrix:
         # Use oldest available macOS and Ubuntu for greatest compatibility
         # of resulting binary.
-        os: [ubuntu-20.04, macos-14, windows-latest, ubuntu-22.04-arm]
+        os: [ubuntu-22.04, macos-14, windows-latest, ubuntu-22.04-arm]
     runs-on: ${{ matrix.os }}
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+        uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install non-Python build dependencies (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: sudo apt-get -y install gettext
       - name: Install non-Python build dependencies (macOS)
         if: ${{ matrix.os == 'macos-14' }}
@@ -58,7 +59,7 @@ jobs:
       - name: Build
         run: make dist
       - name: Build the executable (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-20.04' || matrix.os == 'ubuntu-22.04-arm' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: |
           pip install pyinstaller
           PYTHONPATH=. pyinstaller --noconfirm --onefile --windowed --name chambercourt-${{ runner.os }}-${{ runner.arch }} --copy-metadata chambercourt --add-data "chambercourt/levels:chambercourt/levels" --add-data "chambercourt/locale:chambercourt/locale" chambercourt/__main__.py
