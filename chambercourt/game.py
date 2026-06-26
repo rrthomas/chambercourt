@@ -72,6 +72,15 @@ def clear_keys() -> None:
         pass
 
 
+def sign(x: int) -> int:
+    """Signum function."""
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    return 0
+
+
 DIGIT_KEYS = {
     pygame.K_0: 0,
     pygame.K_1: 1,
@@ -649,6 +658,22 @@ Game instructions go here.
             pygame.mouse.set_visible(False)
         return (dx, dy)
 
+    def get_mouse(self) -> tuple[int, int]:
+        """Get mouse input.
+
+        Returns:
+            tuple[int, int]: the desired unit velocity
+        """
+        dx, dy = 0, 0
+        # Delta in game tiles from mouse click to hero
+        mdelta = self.window_to_game(pygame.mouse.get_pos()) - self.hero.position
+        # Force the delta to have at most one non-zero component
+        if abs(mdelta.x) >= abs(2 * mdelta.y):
+            (dx, dy) = (int(mdelta.x), 0)
+        elif abs(mdelta.y) >= abs(2 * mdelta.x):
+            (dx, dy) = (0, int(mdelta.y))
+        return (dx, dy)
+
     def handle_game_keys(self, event: pygame.event.Event) -> None:
         """Handle in-game keypresses other than player controls.
 
@@ -685,14 +710,20 @@ Game instructions go here.
         if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
             self.quit = True
 
-    def handle_player_controls(self) -> tuple[int, int]:
+    def handle_player_controls(self, mouse_pressed: bool, dx: int, dy: int) -> tuple[int, int]:
         """Handle player control input during the game.
 
         This handles all supported input devices.
+
+        Args:
+            mouse_pressed (bool): true if mouse is used
+            dx (int): current dx
+            dy (int): current dy
+
+        Returns:
+            tuple[int, int]: desired offset.
         """
         pressed = pygame.key.get_pressed()
-        mouse_pressed = pygame.mouse.get_pressed()
-        dx, dy = (0, 0)
         if pressed[pygame.K_LEFT] or pressed[pygame.K_z]:
             dx -= 1
         if pressed[pygame.K_RIGHT] or pressed[pygame.K_x]:
@@ -701,22 +732,11 @@ Game instructions go here.
             dy -= 1
         if pressed[pygame.K_DOWN] or pressed[pygame.K_SLASH]:
             dy += 1
-        if mouse_pressed[0]:
-            mpos = self.window_to_game(pygame.mouse.get_pos())
-            mdx, mdy = (0, 0)
-            if mpos.x > self.hero.position.x:
-                mdx = 1
-            elif mpos.x < self.hero.position.x:
-                mdx = -1
-            if mpos.y > self.hero.position.y:
-                mdy = 1
-            elif mpos.y < self.hero.position.y:
-                mdy = -1
-            if (mdx, mdy) != (0, 0):
-                (dx, dy) = (mdx, mdy)
         (jdx, jdy) = self.handle_joysticks()
         if (jdx, jdy) != (0, 0):
             (dx, dy) = (jdx, jdy)
+        if mouse_pressed:
+            (dx, dy) = self.get_mouse()
         return (dx, dy)
 
     def game_to_screen(self, pos: Vector2) -> tuple[int, int]:
@@ -967,28 +987,35 @@ Game instructions go here.
                 self.hero.velocity = Vector2(0, 0)
                 self._group.update(0)
                 self.start_play()
+                dx, dy = 0, 0
                 while not self.quit and not (
                     self.finished() and (frame == 0 or not moving)
                 ):
                     await self.clock_tick()
 
                     # Check inputs
+                    mouse_pressed = False
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             quit_game()
                         elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
                             self.handle_game_keys(event)
+                        elif event.type == pygame.MOUSEBUTTONDOWN:
+                            mouse_pressed = True
                         self.handle_joystick_plug(event)
                         handle_global_inputs(event)
-                    (dx, dy) = self.handle_player_controls()
+                    dx, dy = self.handle_player_controls(mouse_pressed, dx, dy)
 
                     # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
                         allowed_move = (0, 0)
-                        if dx != 0 and self.try_move(Vector2(dx, 0)):
-                            allowed_move = (dx, 0)
-                        elif dy != 0 and self.try_move(Vector2(0, dy)):
-                            allowed_move = (0, dy)
+                        try_dx, try_dy = sign(dx), sign(dy)
+                        if dx != 0 and self.try_move(Vector2(try_dx, 0)):
+                            allowed_move = (try_dx, 0)
+                            dx -= try_dx
+                        elif dy != 0 and self.try_move(Vector2(0, try_dy)):
+                            allowed_move = (0, try_dy)
+                            dy -= try_dy
                         if allowed_move != (0, 0):
                             self.hero.velocity = Vector2(allowed_move)
                             frame = 0
