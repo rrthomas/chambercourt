@@ -780,7 +780,6 @@ Game instructions go here.
                 align="center",
             )
 
-            # FIXME: Factor out reusable routines to create a new button
             # Draw level selector and find where the arrows are
             level_msg = _("Start at level: ←{}→/{}").format(
                 1 if level is None else level, self.num_levels
