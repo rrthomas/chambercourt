@@ -166,6 +166,8 @@ class Game[Tile: StrEnum]:
         self.hero: Hero
         self.map_data: pyscroll.data.TiledMapData
         self._joysticks: dict[int, pygame.joystick.JoystickType] = {}
+        self.license_string = _("""Distributed under the GNU General Public License version 3, or (at
+your option) any later version. There is no warranty.""")
 
     @staticmethod
     def description() -> str:
@@ -279,8 +281,13 @@ Game instructions go here.
         # Window can be as wide as the screen, but must leave room for the
         # level title.
         self.window_size = (
-            min(self.window_size[0] * self.window_scale, self.screen_size[0]) // self.window_scale,
-            min(self.window_size[1] * self.window_scale, self.screen_size[1] - self.font_pixels) // self.window_scale,
+            min(self.window_size[0] * self.window_scale, self.screen_size[0])
+            // self.window_scale,
+            min(
+                self.window_size[1] * self.window_scale,
+                self.screen_size[1] - self.font_pixels,
+            )
+            // self.window_scale,
         )
         self.screen_char_width = self.screen_size[0] // self.font_pixels
         self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
@@ -361,7 +368,9 @@ Game instructions go here.
         """
         return (pos[0] * self.font_pixels, pos[1] * self.font_pixels)
 
-    def print_screen_raw(self, pos: tuple[int, int], msg: str, **kwargs) -> tuple[int, int]:
+    def print_screen_raw(
+        self, pos: tuple[int, int], msg: str, **kwargs
+    ) -> tuple[int, int]:
         """Print text on the screen at the given pixel coordinates.
 
         Args:
@@ -476,7 +485,8 @@ Game instructions go here.
         )
         self.window_pos = (
             (self.surface.get_width() - self.window_scaled_width) // 2,
-            (self.surface.get_height() - self.window_scaled_height - self.font_pixels) // 2
+            (self.surface.get_height() - self.window_scaled_height - self.font_pixels)
+            // 2
             + self.font_pixels,
         )
 
@@ -711,7 +721,9 @@ Game instructions go here.
         if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
             self.quit = True
 
-    def handle_player_controls(self, mouse_pressed: bool, dx: int, dy: int) -> tuple[int, int]:
+    def handle_player_controls(
+        self, mouse_pressed: bool, dx: int, dy: int
+    ) -> tuple[int, int]:
         """Handle player control input during the game.
 
         This handles all supported input devices.
@@ -817,8 +829,16 @@ Game instructions go here.
             level_left_x = (self.surface.get_width() - level_msg_width) // 2
             left_arrow_width = self.text_width("←")
             right_arrow_width = self.text_width("→")
-            left_arrow_x = level_left_x + self.text_width(level_msg[:left_arrow_index + 1]) - left_arrow_width
-            right_arrow_x = level_left_x + self.text_width(level_msg[:right_arrow_index + 1]) - right_arrow_width
+            left_arrow_x = (
+                level_left_x
+                + self.text_width(level_msg[: left_arrow_index + 1])
+                - left_arrow_width
+            )
+            right_arrow_x = (
+                level_left_x
+                + self.text_width(level_msg[: right_arrow_index + 1])
+                - right_arrow_width
+            )
             left_zone = Rect(
                 left_arrow_x,
                 arrows_y,
@@ -849,14 +869,23 @@ Game instructions go here.
             play_left_x = (self.surface.get_width() - play_msg_width) // 2
             p_width = self.text_width(play_msg[0])
             play_width = self.text_width(_("play"))
-            play_x = play_left_x + self.text_width(play_msg[:play_index + 1]) - p_width
+            play_x = play_left_x + self.text_width(play_msg[: play_index + 1]) - p_width
             play_zone = Rect(
                 play_x,
                 play_button_y,
                 play_width,
                 self.font_pixels,
             )
-            self.print_screen_raw((play_x, play_button_y), _("play"), background="darkgrey")
+            self.print_screen_raw(
+                (play_x, play_button_y), _("play"), background="darkgrey"
+            )
+            self.print_screen_raw(
+                (0, self.screen_size[1] - self.font_pixels),
+                f"v{self.version}",
+                width=self.surface.get_width(),
+                align="right",
+                color="grey",
+            )
 
             pygame.display.flip()
             handle_quit_event()
@@ -1128,7 +1157,7 @@ Game instructions go here.
             _ = cat.gettext
 
         metadata = importlib.metadata.metadata(self.game_package_name)
-        version = importlib.metadata.version(self.game_package_name)
+        self.version = importlib.metadata.version(self.game_package_name)
         homepage = metadata["Project-URL"].removeprefix("Homepage, ")
 
         # Set app name for SDL
@@ -1152,11 +1181,17 @@ Game instructions go here.
                     "-V",
                     "--version",
                     action="raw_version",
-                    version=_("""%(prog)s {}
+                    version=(
+                        """%(prog)s {}
 © {}
 {}
-{}""").format(version, metadata["Author-email"], homepage, """Distributed under the GNU General Public License version 3, or (at
-your option) any later version. There is no warranty."""),
+{}"""
+                    ).format(
+                        self.version,
+                        metadata["Author-email"],
+                        homepage,
+                        self.license_string,
+                    ),
                 )
                 warnings.showwarning = simple_warning(parser.prog)
                 args = parser.parse_args(argv)
@@ -1229,7 +1264,7 @@ L/Button B - Load position
 R/Button Y - Restart level
 Q - Quit game
 F - toggle full screen
-""")
+"""),
                 )
                 await self.run(level)
         except KeyboardInterrupt:
