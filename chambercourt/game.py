@@ -30,6 +30,7 @@ from platformdirs import user_data_dir
 
 from .event import handle_global_inputs, handle_quit_event, quit_game
 from .langdetect import language_code
+from .raw_version import RawVersionAction
 from .warnings_util import die, simple_warning
 
 
@@ -1128,6 +1129,7 @@ Game instructions go here.
 
         metadata = importlib.metadata.metadata(self.game_package_name)
         version = importlib.metadata.version(self.game_package_name)
+        homepage = metadata["Project-URL"].removeprefix("Homepage, ")
 
         # Set app name for SDL
         os.environ["SDL_APP_NAME"] = metadata["Name"]
@@ -1140,6 +1142,7 @@ Game instructions go here.
             ) as path:
                 # Command-line arguments
                 parser = argparse.ArgumentParser(description=self.description())
+                parser.register("action", "raw_version", RawVersionAction)
                 parser.add_argument(
                     "--levels",
                     metavar="DIRECTORY",
@@ -1148,10 +1151,12 @@ Game instructions go here.
                 parser.add_argument(
                     "-V",
                     "--version",
-                    action="version",
-                    version=_("%(prog)s {} by {}").format(
-                        version, metadata["Author-email"]
-                    ),
+                    action="raw_version",
+                    version=_("""%(prog)s {}
+© {}
+{}
+{}""").format(version, metadata["Author-email"], homepage, """Distributed under the GNU General Public License version 3, or (at
+your option) any later version. There is no warranty."""),
                 )
                 warnings.showwarning = simple_warning(parser.prog)
                 args = parser.parse_args(argv)
