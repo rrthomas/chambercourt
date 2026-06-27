@@ -270,14 +270,23 @@ Game instructions go here.
                     return built_in_asset
         raise OSError(_("cannot find asset `{}'").format(asset_file))
 
+    def set_screen_size(self, size: tuple[int, int]) -> None:
+        """Set the game window to the given size.
+
+        Args:
+            size (tuple[int, int]): desired screen size
+        """
+        self.surface = pygame.display.set_mode(size, pygame.RESIZABLE, vsync=1)
+
     def init_screen(self) -> None:
         """Initialise the screen."""
         self.font_pixels = 8 * self.window_scale * self.font_scale
         info = pygame.display.Info()
-        self.screen_size = (
-            min(self.screen_size[0], info.current_w),
-            min(self.screen_size[1], info.current_h),
-        )
+        if info.current_w > 0 and info.current_h > 0:
+            self.screen_size = (
+                min(self.screen_size[0], info.current_w),
+                min(self.screen_size[1], info.current_h),
+            )
         # Window can be as wide as the screen, but must leave room for the
         # level title.
         self.window_size = (
@@ -290,7 +299,7 @@ Game instructions go here.
             // self.window_scale,
         )
         self.screen_char_width = self.screen_size[0] // self.font_pixels
-        self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
+        self.set_screen_size(self.screen_size)
         self.reinit_screen()
         # Force ptext to cache the font
         self.print_screen((0, 0), "")
@@ -931,6 +940,8 @@ Game instructions go here.
                         play = True
                 elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
                     self.handle_joystick_plug(event)
+                elif event.type == pygame.VIDEORESIZE:
+                    print(self.surface.get_size())
                 handle_global_inputs(event)
                 (dx, dy) = self.handle_joysticks()
                 level_change += dx - dy
