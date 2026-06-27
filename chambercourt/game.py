@@ -137,6 +137,65 @@ class Game[Tile: StrEnum]:
         self.empty_tile = empty_tile
         self.default_tile = default_tile
 
+        self.screen_size = (0, 0)
+        """The size of the game screen.
+
+        A pair giving the `(height, width)` of the screen.
+        """
+
+        self.tile_width, self.tile_height = (16, 16)
+        """The size of game tiles in pixels."""
+
+        self.game_window_max = (8, 8)
+        """The maximum size of the area in which the game world is shown.
+
+        A pair giving the `(height, width)` of the window in game tiles.
+        """
+
+        self.screen_extra_x_chars = 0
+        """Extra space required, in characters, for screen."""
+
+        self.screen_extra_y_chars = 1
+        """Extra space required, in characters, for screen."""
+
+        self.screen_min_text_size = (40, 32)
+        """Minimum number of characters across and down the screen."""
+
+        self.min_screen_scale = 1
+        """The minimum integer scale factor applied to the screen.
+
+        The game screen is scaled by this factor before being blitted to the
+        display.
+        """
+
+        self.text_colour = Color(255, 255, 255)
+        """The default text colour."""
+
+        self.default_background_colour = Color(32, 32, 32)
+        """The background colour of the screen."""
+
+        self.font_name = "acorn-mode-1.ttf"
+        """The monospaced font to use for text."""
+
+        self.font_scale = 1
+        """The scale factor applied to the font.
+
+        The font is scaled by `screen_scale` and then by this factor.
+        """
+
+        self.instructions_y = 12
+        """The text y coordinate at which the instructions are printed."""
+
+        self.frames_per_second = 60
+        """Frames per second for the game main loop."""
+
+        self.frames = 8
+        """Number of frames over which to animate each hero move."""
+
+        self.default_volume = 0.8
+        """Default volume of sound effects."""
+
+        self.screen_scale: int
         self.clock = pygame.time.Clock()
         self.num_levels: int
         self.levels_files: list[Path]
@@ -145,8 +204,6 @@ class Game[Tile: StrEnum]:
         self.title_image: pygame.Surface
         self.window_pixel_width: int
         self.window_pixel_height: int
-        self.window_scaled_width: int
-        self.window_scaled_height: int
         self.window_pos: tuple[int, int] = (0, 0)
         self.game_surface: pygame.Surface
         self.quit = False
@@ -201,52 +258,6 @@ Game instructions go here.
 """
         # fmt: on
 
-    screen_size = (640, 480)
-    """The size of the game screen.
-
-    A pair giving the `(height, width)` of the screen.
-    """
-
-    window_size = (300, 300)
-    """The size of the game window.
-
-    A pair giving the `(height, width)` of the window. This is the area in
-    which the game world is shown.
-    """
-
-    window_scale = 1
-    """The scale factor applied to the game window.
-
-    The window is scaled by this factor before being blitted to the screen.
-    """
-
-    text_colour = Color(255, 255, 255)
-    """The default text colour."""
-
-    default_background_colour = Color(32, 32, 32)
-    """The background colour of the screen."""
-
-    font_name = "acorn-mode-1.ttf"
-    """The monospaced font to use for text."""
-
-    font_scale = 1
-    """The scale factor applied to the font.
-
-    The font is scaled by `window_scale` and then by this factor.
-    """
-
-    instructions_y = 12
-    """The text y coordinate at which the instructions are printed."""
-
-    frames_per_second = 60
-    """Frames per second for the game main loop."""
-
-    frames = 8
-    """Number of frames over which to animate each hero move."""
-
-    default_volume = 0.8
-    """Default volume of sound effects."""
-
     def find_asset(self, asset_file: str) -> Path:
         """Find a game asset.
 
@@ -272,28 +283,97 @@ Game instructions go here.
 
     def init_screen(self) -> None:
         """Initialise the screen."""
-        self.font_pixels = 8 * self.window_scale * self.font_scale
         info = pygame.display.Info()
-        self.screen_size = (
-            min(self.screen_size[0], info.current_w),
-            min(self.screen_size[1], info.current_h),
+        if info.current_w <= 0 or info.current_h <= 0:
+            raise ValueError("cannot get display size")
+
+        # Fill available area, smaller dimension first
+        scale = self.min_screen_scale
+        if info.current_w <= info.current_h:
+            # Find biggest `screen_scale` that fits
+            # `self.game_window_max[0]` tiles plus
+            # `self.screen_extra_x_chars` characters.
+            while True:
+                font_pixels = 8 * scale * self.font_scale
+                game_window_width = (
+                    info.current_w - self.screen_extra_x_chars * font_pixels
+                )
+                width_in_tiles = game_window_width // (self.tile_width * scale)
+                if (
+                    width_in_tiles < self.game_window_max[0]
+                    or info.current_w // font_pixels < self.screen_min_text_size[0]
+                ):
+                    break
+                scale += 1
+        else:
+            # Find biggest `screen_scale` that fits
+            # `self.game_window_max[1]` tiles plus
+            # `self.screen_extra_y_chars` characters.
+            while True:
+                font_pixels = 8 * scale * self.font_scale
+                game_window_height = (
+                    info.current_h - self.screen_extra_y_chars * font_pixels
+                )
+                height_in_tiles = game_window_height // (self.tile_height * scale)
+                if (
+                    height_in_tiles < self.game_window_max[1]
+                    or info.current_h // font_pixels < self.screen_min_text_size[1]
+                ):
+                    break
+                scale += 1
+
+        # Set screen parameters according to the results
+        scale = max(scale - 1, 1)
+        font_pixels = 8 * scale * self.font_scale
+        game_window_width = info.current_w - self.screen_extra_x_chars * font_pixels
+        width_in_tiles = min(
+            game_window_width // (self.tile_width * scale), self.game_window_max[0]
         )
-        # Window can be as wide as the screen, but must leave room for the
-        # level title.
+        game_window_height = info.current_h - self.screen_extra_y_chars * font_pixels
+        height_in_tiles = min(
+            game_window_height // (self.tile_height * scale), self.game_window_max[1]
+        )
+
+        self.screen_scale = scale
+        self.font_pixels = 8 * self.font_scale * self.screen_scale
         self.window_size = (
-            min(self.window_size[0] * self.window_scale, self.screen_size[0])
-            // self.window_scale,
-            min(
-                self.window_size[1] * self.window_scale,
-                self.screen_size[1] - self.font_pixels,
-            )
-            // self.window_scale,
+            width_in_tiles * self.tile_width * self.screen_scale,
+            height_in_tiles * self.tile_height * self.screen_scale,
         )
+        if self.screen_size == (0, 0):
+            self.screen_size = (
+                max(
+                    self.window_size[0] + self.screen_extra_x_chars * self.font_pixels,
+                    self.screen_min_text_size[0] * self.font_pixels,
+                ),
+                max(
+                    self.window_size[1] + self.screen_extra_y_chars * self.font_pixels,
+                    self.screen_min_text_size[1] * self.font_pixels,
+                ),
+            )
+            self.surface = pygame.display.set_mode(
+                self.screen_size, pygame.RESIZABLE, vsync=1
+            )
+        else:
+            self.screen_size = (info.current_w, info.current_h)
         self.screen_char_width = self.screen_size[0] // self.font_pixels
-        self.surface = pygame.display.set_mode(self.screen_size, pygame.SCALED, vsync=1)
         self.reinit_screen()
         # Force ptext to cache the font
         self.print_screen((0, 0), "")
+
+        self.window_pos = (
+            max(
+                self.screen_extra_x_chars * self.font_pixels,
+                (self.surface.get_width() - self.window_size[0]) // 2,
+            ),
+            (
+                self.surface.get_height()
+                - self.window_size[1]
+                - self.screen_extra_y_chars * self.font_pixels
+            )
+            // 2
+            + self.screen_extra_y_chars * self.font_pixels,
+        )
 
     def clear_screen(self) -> None:
         """Clear the screen."""
@@ -333,17 +413,17 @@ Game instructions go here.
         )
 
     def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
-        """Scales the given surface by `self.window_scale`.
+        """Scales the given surface by `self.screen_scale`.
 
         Args:
             surface (pygame.Surface): surface to scale
 
         Returns:
             pygame.Surface: a new surface, that is `surface` scaled by
-            `self.window_scale`.
+            `self.screen_scale`.
         """
-        scaled_width = surface.get_width() * self.window_scale
-        scaled_height = surface.get_height() * self.window_scale
+        scaled_width = surface.get_width() * self.screen_scale
+        scaled_height = surface.get_height() * self.screen_scale
         scaled_surface = pygame.Surface((scaled_width, scaled_height))
         pygame.transform.scale(surface, (scaled_width, scaled_height), scaled_surface)
         return scaled_surface
@@ -467,28 +547,11 @@ Game instructions go here.
         level_file = self.levels_files[self.level - 1]
         self.load_level(level_file)
         (self.level_width, self.level_height) = self.map_data.map_size
-        (self.tile_width, self.tile_height) = self.map_data.tile_size
-        self.window_pixel_width = min(
-            self.level_width * self.tile_width,
-            self.window_size[0],
-        )
-        self.window_pixel_height = min(
-            self.level_height * self.tile_height,
-            self.window_size[1],
-        )
-        (self.window_scaled_width, self.window_scaled_height) = (
-            self.window_pixel_width * self.window_scale,
-            self.window_pixel_height * self.window_scale,
-        )
-        self.game_surface = pygame.Surface(
-            (self.window_pixel_width, self.window_pixel_height)
-        )
-        self.window_pos = (
-            (self.surface.get_width() - self.window_scaled_width) // 2,
-            (self.surface.get_height() - self.window_scaled_height - self.font_pixels)
-            // 2
-            + self.font_pixels,
-        )
+        if self.map_data.tile_size != (self.tile_width, self.tile_height):
+            raise ValueError(
+                f"tile size {self.map_data.tile_size} not expected value {(self.tile_width, self.tile_height)}"
+            )
+        self.clamp_window()
 
         # Dict mapping tileset GIDs to map gids
         map_gids = self.map_data.tmx.gidmap
@@ -505,6 +568,23 @@ Game instructions go here.
 
         self.init_renderer()
         self.init_game()
+
+    def clamp_window(self) -> None:
+        """Clamp the window size to the level size.
+
+        If the level is smaller than the window, reduce the window size.
+        """
+        self.window_pixel_width = min(
+            self.level_width * self.tile_width,
+            self.window_size[0] // self.screen_scale,
+        )
+        self.window_pixel_height = min(
+            self.level_height * self.tile_height,
+            self.window_size[1] // self.screen_scale,
+        )
+        self.game_surface = pygame.Surface(
+            (self.window_pixel_width, self.window_pixel_height)
+        )
 
     def start_level(self) -> None:
         """Start a level, saving the initial position."""
@@ -794,9 +874,9 @@ Game instructions go here.
         """
         origin = self._map_layer.get_center_offset()
         return Vector2(
-            ((pos[0] - self.window_pos[0]) // self.window_scale - origin[0])
+            ((pos[0] - self.window_pos[0]) // self.screen_scale - origin[0])
             // self.tile_width,
-            ((pos[1] - self.window_pos[1]) // self.window_scale - origin[1])
+            ((pos[1] - self.window_pos[1]) // self.screen_scale - origin[1])
             // self.tile_height,
         )
 
@@ -816,9 +896,9 @@ Game instructions go here.
             self.surface.blit(
                 self.scale_surface(title_image),
                 (
-                    (self.screen_size[0] - title_image.get_width() * self.window_scale)
+                    (self.screen_size[0] - title_image.get_width() * self.screen_scale)
                     // 2,
-                    12 * self.window_scale,
+                    12 * self.screen_scale,
                 ),
             )
             self.print_screen(
@@ -947,6 +1027,8 @@ Game instructions go here.
                         play = True
                 elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
                     self.handle_joystick_plug(event)
+                elif event.type in (pygame.WINDOWRESIZED, pygame.WINDOWSIZECHANGED):
+                    self.init_screen()
                 handle_global_inputs(event)
                 (dx, dy) = self.handle_joysticks()
                 level_change += dx - dy
@@ -1050,6 +1132,13 @@ Game instructions go here.
                             self.handle_game_keys(event)
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             mouse_pressed = True
+                        elif event.type in (
+                            pygame.WINDOWRESIZED,
+                            pygame.WINDOWSIZECHANGED,
+                        ):
+                            self.init_screen()
+                            self.clamp_window()
+                            self.init_renderer()
                         self.handle_joystick_plug(event)
                         handle_global_inputs(event)
                     (dx, dy), (kdx, kdy), (jdx, jdy) = self.handle_player_controls(
