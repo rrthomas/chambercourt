@@ -13,6 +13,7 @@ class RawVersionAction(argparse._VersionAction):
     """Customized _VersionAction with RawDescription-formatted output."""
 
     def __call__(self, parser, namespace, values, option_string=None):
+        """Function call dunder method."""
         version = self.version
         formatter = argparse.RawDescriptionHelpFormatter(prog=parser.prog)
         formatter.add_text(version)
