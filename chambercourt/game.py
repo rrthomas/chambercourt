@@ -722,8 +722,8 @@ Game instructions go here.
             self.quit = True
 
     def handle_player_controls(
-        self, mouse_pressed: bool, dx: int, dy: int
-    ) -> tuple[int, int]:
+        self, mouse_pressed: bool, dx: int, dy: int, kdx: int, kdy: int, jdx: int, jdy: int,
+    ) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int]]:
         """Handle player control input during the game.
 
         This handles all supported input devices.
@@ -732,25 +732,34 @@ Game instructions go here.
             mouse_pressed (bool): true if mouse is used
             dx (int): current dx
             dy (int): current dy
+            kdx (int): current keyboard dx
+            kdy (int): current keyboard dy
+            jdx (int): current joystick dx
+            jdy (int): current joystick dy
 
         Returns:
             tuple[int, int]: desired offset.
         """
         pressed = pygame.key.get_pressed()
+        new_kdx, new_kdy = (0, 0)
         if pressed[pygame.K_LEFT] or pressed[pygame.K_z]:
-            dx -= 1
+            new_kdx = -1
         if pressed[pygame.K_RIGHT] or pressed[pygame.K_x]:
-            dx += 1
+            new_kdx = 1
         if pressed[pygame.K_UP] or pressed[pygame.K_QUOTE]:
-            dy -= 1
+            new_kdy = -1
         if pressed[pygame.K_DOWN] or pressed[pygame.K_SLASH]:
-            dy += 1
-        (jdx, jdy) = self.handle_joysticks()
-        if (jdx, jdy) != (0, 0):
-            (dx, dy) = (jdx, jdy)
+            new_kdy = 1
+        if (new_kdx, new_kdy) != (kdx, kdy):
+            kdx, kdy = (new_kdx, new_kdy)
+            dx, dy = (kdx, kdy)
+        (new_jdx, new_jdy) = self.handle_joysticks()
+        if (new_jdx, new_jdy) != (jdx, jdy):
+            jdx, jdy = (new_jdx, new_jdy)
+            dx, dy = (jdx, jdy)
         if mouse_pressed:
             (dx, dy) = self.get_mouse()
-        return (dx, dy)
+        return (dx, dy), (kdx, kdy), (jdx, jdy)
 
     def game_to_screen(self, pos: Vector2) -> tuple[int, int]:
         """Convert game grid to screen coordinates.
@@ -1018,6 +1027,8 @@ Game instructions go here.
                 self._group.update(0)
                 self.start_play()
                 dx, dy = 0, 0
+                kdx, kdy = 0, 0
+                jdx, jdy = 0, 0
                 while not self.quit and not (
                     self.finished() and (frame == 0 or not moving)
                 ):
@@ -1034,7 +1045,7 @@ Game instructions go here.
                             mouse_pressed = True
                         self.handle_joystick_plug(event)
                         handle_global_inputs(event)
-                    dx, dy = self.handle_player_controls(mouse_pressed, dx, dy)
+                    (dx, dy), (kdx, kdy), (jdx, jdy) = self.handle_player_controls(mouse_pressed, dx, dy, kdx, kdy, jdx, jdy)
 
                     # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
@@ -1051,6 +1062,8 @@ Game instructions go here.
                             frame = 0
                             moving = True
                             self.moves += 1
+                            kdx, kdy = 0, 0
+                            jdx, jdy = 0, 0
 
                     # Step frame counter and animate
                     frame = (frame + 1) % self.frames
