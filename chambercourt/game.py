@@ -722,7 +722,14 @@ Game instructions go here.
             self.quit = True
 
     def handle_player_controls(
-        self, mouse_pressed: bool, dx: int, dy: int, kdx: int, kdy: int, jdx: int, jdy: int,
+        self,
+        mouse_pressed: bool,
+        dx: int,
+        dy: int,
+        kdx: int,
+        kdy: int,
+        jdx: int,
+        jdy: int,
     ) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int]]:
         """Handle player control input during the game.
 
@@ -1045,7 +1052,9 @@ Game instructions go here.
                             mouse_pressed = True
                         self.handle_joystick_plug(event)
                         handle_global_inputs(event)
-                    (dx, dy), (kdx, kdy), (jdx, jdy) = self.handle_player_controls(mouse_pressed, dx, dy, kdx, kdy, jdx, jdy)
+                    (dx, dy), (kdx, kdy), (jdx, jdy) = self.handle_player_controls(
+                        mouse_pressed, dx, dy, kdx, kdy, jdx, jdy
+                    )
 
                     # If Hero is not moving already, try to start new move
                     if not moving and (dx, dy) != (0, 0):
