@@ -955,13 +955,13 @@ Game instructions go here.
             await self.clock_tick()
         return max(min(level or 1, self.num_levels), 1)
 
-    def end_game(self) -> None:
+    async def end_game(self) -> None:
         """Do any game-specific tear-down when the game ends."""
 
-    def start_play(self) -> None:
+    async def start_play(self) -> None:
         """Do any game-specific set-up when play starts."""
 
-    def stop_play(self) -> None:
+    async def stop_play(self) -> None:
         """Do any game-specific tear-down when play is interrupted."""
 
     def update_map(self) -> None:
@@ -1013,7 +1013,7 @@ Game instructions go here.
             self.draw()
             self.game_surface.blit(zoomed_hero, origin + delta * factor)
             self.show_screen()
-        pygame.time.wait(2000)
+        await asyncio.sleep(2.0)
 
     async def run(self, level: int) -> None:
         """Run the game main loop, starting on the given level.
@@ -1032,7 +1032,7 @@ Game instructions go here.
                 self.moves = 0
                 self.hero.velocity = Vector2(0, 0)
                 self._group.update(0)
-                self.start_play()
+                await self.start_play()
                 dx, dy = 0, 0
                 kdx, kdy = 0, 0
                 jdx, jdy = 0, 0
@@ -1088,13 +1088,13 @@ Game instructions go here.
                     self.draw()
                     self.show_status()
                     self.show_screen()
-                self.stop_play()
+                await self.stop_play()
             if self.finished():
                 await self.end_level()
                 self.level += 1
         if self.level > self.num_levels:
             await self.win_game()
-        self.end_game()
+        await self.end_game()
 
     def init_game(self) -> None:
         """Initialise game state.
