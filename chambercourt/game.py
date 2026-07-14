@@ -424,9 +424,7 @@ Game instructions go here.
         """
         scaled_width = surface.get_width() * self.screen_scale
         scaled_height = surface.get_height() * self.screen_scale
-        scaled_surface = pygame.Surface((scaled_width, scaled_height))
-        pygame.transform.scale(surface, (scaled_width, scaled_height), scaled_surface)
-        return scaled_surface
+        return pygame.transform.scale(surface, (scaled_width, scaled_height))
 
     def show_screen(self) -> None:
         """Show the current frame, and clear the rendering buffer."""
