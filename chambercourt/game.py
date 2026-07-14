@@ -1012,7 +1012,7 @@ Game instructions go here.
                             level = None
                     else:
                         level = None
-                elif event.type == pygame.MOUSEBUTTONUP:
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
                     if left_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
                         level_change = -1
@@ -1128,7 +1128,7 @@ Game instructions go here.
                             quit_game()
                         elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
                             self.handle_game_keys(event)
-                        elif event.type == pygame.MOUSEBUTTONDOWN:
+                        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                             mouse_pressed = True
                         elif event.type in (
                             pygame.WINDOWRESIZED,
