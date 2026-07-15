@@ -16,6 +16,7 @@ import importlib.resources
 import locale
 import os
 import pickle
+import sys
 import warnings
 import zipfile
 from collections.abc import Callable
@@ -23,12 +24,11 @@ from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, cast
+from typing import Any, NoReturn, cast
 
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
 
-from .event import handle_global_inputs, handle_quit_event, quit_game
 from .langdetect import language_code
 from .raw_version import RawVersionAction
 from .warnings_util import die, simple_warning
@@ -980,12 +980,12 @@ Game instructions go here.
             )
 
             pygame.display.flip()
-            handle_quit_event()
+            self.handle_quit_event()
             for event in pygame.event.get():
                 level_change = 0
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        quit_game()
+                        self.quit_game()
                     elif event.key == pygame.K_SPACE:
                         play = True
                     elif event.key in (
@@ -1025,7 +1025,7 @@ Game instructions go here.
                     self.handle_joystick_plug(event)
                 elif event.type in (pygame.WINDOWRESIZED, pygame.WINDOWSIZECHANGED):
                     self.init_screen()
-                handle_global_inputs(event)
+                self.handle_global_inputs(event)
                 (dx, dy) = self.handle_joysticks()
                 level_change += dx - dy
                 if level_change != 0:
@@ -1123,7 +1123,7 @@ Game instructions go here.
                     mouse_pressed = False
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
-                            quit_game()
+                            self.quit_game()
                         elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
                             self.handle_game_keys(event)
                         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -1136,7 +1136,7 @@ Game instructions go here.
                             self.clamp_window()
                             self.init_renderer()
                         self.handle_joystick_plug(event)
-                        handle_global_inputs(event)
+                        self.handle_global_inputs(event)
                     (dx, dy), (kdx, kdy), (jdx, jdy) = self.handle_player_controls(
                         mouse_pressed, dx, dy, kdx, kdy, jdx, jdy
                     )
@@ -1249,6 +1249,35 @@ Game instructions go here.
                 if block not in (self.hero_tile, self.default_tile, self.empty_tile):
                     return False
         return True
+
+    def quit_game(self) -> NoReturn:
+        """Quit the game immediately."""
+        pygame.quit()
+        sys.exit()
+
+    def handle_quit_event(self) -> None:
+        """React to `pygame.QUIT` event."""
+        if len(pygame.event.get(pygame.QUIT)) > 0:
+            self.quit_game()
+
+    def handle_global_inputs(self, event: pygame.event.Event) -> None:
+        """React to inputs that work anywhere in the game.
+
+        Args:
+            event (pygame.event.Event): An event.
+        """
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_f:
+                pygame.display.toggle_fullscreen()
+
+        if event.type in (
+            pygame.MOUSEMOTION,
+            pygame.MOUSEBUTTONDOWN,
+            pygame.MOUSEWHEEL,
+        ):
+            pygame.mouse.set_visible(True)
+        elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
+            pygame.mouse.set_visible(False)
 
     async def main(self, argv: list[str]) -> None:
         """Main function for the game.
@@ -1389,7 +1418,7 @@ F - toggle full screen
                 )
                 await self.run(level)
         except KeyboardInterrupt:
-            quit_game()
+            self.quit_game()
 
 
 class Hero(pygame.sprite.Sprite):
