@@ -26,6 +26,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, cast
 
 import i18nparse  # type: ignore
+import thorpy as tp
 from platformdirs import user_data_dir
 
 from .langdetect import language_code
@@ -353,6 +354,8 @@ Game instructions go here.
             self.surface = pygame.display.set_mode(
                 self.screen_size, pygame.RESIZABLE, vsync=1
             )
+            tp.set_default_font(str(self.font_path), font_size=self.font_pixels)
+            tp.init(self.surface, tp.theme_text)
         else:
             self.screen_size = (info.current_w, info.current_h)
         self.screen_char_width = self.screen_size[0] // self.font_pixels
@@ -961,17 +964,11 @@ Game instructions go here.
             play_msg_width = self.text_width(play_msg)
             play_left_x = (self.surface.get_width() - play_msg_width) // 2
             p_width = self.text_width(play_msg[0])
-            play_width = self.text_width(_("play"))
             play_x = play_left_x + self.text_width(play_msg[: play_index + 1]) - p_width
-            play_zone = Rect(
-                play_x,
-                play_button_y,
-                play_width,
-                self.font_pixels,
-            )
-            self.print_screen_raw(
-                (play_x, play_button_y), _("play"), background="darkgrey"
-            )
+            button = tp.Button(_("play"))
+            darkgrey = pygame.Color("darkgrey")
+            button.set_bck_color((darkgrey.r, darkgrey.g, darkgrey.b))
+
             self.print_screen_raw(
                 (0, self.screen_size[1] - self.font_pixels),
                 f"v{self.version}",
@@ -980,9 +977,14 @@ Game instructions go here.
                 color="grey",
             )
 
+            ui_elements = tp.Group([button])
+            ui_elements.set_topleft(play_x, play_button_y)
+            updater = ui_elements.get_updater()
+            events = pygame.event.get()
+            updater.update(events=events)
             pygame.display.flip()
             self.handle_quit_event()
-            for event in pygame.event.get():
+            for event in events:
                 level_change = 0
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
@@ -1017,8 +1019,8 @@ Game instructions go here.
                         level_change = -1
                     elif right_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
                         level_change = 1
-                    elif play_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
-                        play = True
+                    # elif play_zone.collidepoint(mouse_pos[0], mouse_pos[1]):
+                    #     play = True
                 elif event.type == pygame.JOYBUTTONDOWN:
                     if event.button == 0:
                         play = True

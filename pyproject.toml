@@ -9,10 +9,13 @@ urls = {Homepage = "https://github.com/rrthomas/chambercourt"}
 requires-python = ">= 3.12"
 dependencies = [
     "i18nparse",
+    "numpy",              # for thorpy
+    "pillow",             # for thorpy
     "platformdirs",
     "pygame-ce >= 2.5.7",
     "pyscroll",
     "pytmx",
+    "thorpy",
 ]
 classifiers = [
     "Environment :: X11 Applications",
