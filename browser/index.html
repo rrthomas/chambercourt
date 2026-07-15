@@ -33,7 +33,8 @@
 
       pygame.init()
       pygame.display.set_mode((window.innerWidth, window.innerHeight), 0, vsync=1)
-      asyncio.create_task(ChambercourtGame().main([]))
+      while True:
+          await asyncio.create_task(ChambercourtGame().main([]))
     </script>
   </body>
 </html>

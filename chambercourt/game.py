@@ -16,7 +16,6 @@ import importlib.resources
 import locale
 import os
 import pickle
-import sys
 import warnings
 import zipfile
 from collections.abc import Callable
@@ -24,7 +23,7 @@ from enum import StrEnum
 from itertools import chain
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, NoReturn, cast
+from typing import Any, cast
 
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
@@ -136,6 +135,7 @@ class Game[Tile: StrEnum]:
         self.hero_tile = hero_tile
         self.empty_tile = empty_tile
         self.default_tile = default_tile
+
         self.screen_size = (0, 0)
 
         self.tile_width, self.tile_height = (16, 16)
@@ -205,6 +205,7 @@ class Game[Tile: StrEnum]:
         self.window_pos: tuple[int, int] = (0, 0)
         self.game_surface: pygame.Surface
         self.quit = False
+        self.exit = False
         self.level = 1
         self.moves = 0
         self.level_width: int
@@ -887,7 +888,7 @@ Game instructions go here.
         )
         play_y = start_level_y + 2
         play = False
-        while not play:
+        while not self.exit and not play:
             self.reinit_screen()
             self.surface.blit(
                 self.scale_surface(title_image),
@@ -985,7 +986,7 @@ Game instructions go here.
                 level_change = 0
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
-                        self.quit_game()
+                        self.exit_game()
                     elif event.key == pygame.K_SPACE:
                         play = True
                     elif event.key in (
@@ -1123,7 +1124,7 @@ Game instructions go here.
                     mouse_pressed = False
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
-                            self.quit_game()
+                            self.exit_game()
                         elif event.type in (pygame.KEYDOWN, pygame.JOYBUTTONDOWN):
                             self.handle_game_keys(event)
                         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -1250,15 +1251,15 @@ Game instructions go here.
                     return False
         return True
 
-    def quit_game(self) -> NoReturn:
-        """Quit the game immediately."""
-        pygame.quit()
-        sys.exit()
+    def exit_game(self) -> None:
+        """Exit the game immediately."""
+        self.quit = True
+        self.exit = True
 
     def handle_quit_event(self) -> None:
         """React to `pygame.QUIT` event."""
         if len(pygame.event.get(pygame.QUIT)) > 0:
-            self.quit_game()
+            self.exit_game()
 
     def handle_global_inputs(self, event: pygame.event.Event) -> None:
         """React to inputs that work anywhere in the game.
@@ -1396,7 +1397,7 @@ Game instructions go here.
 
         # Main loop
         try:
-            while True:
+            while self.exit is False:
                 level = await self.title_screen(
                     self.title_image.convert(),
                     # TRANSLATORS: Please keep this text wrapped to 40 characters.
@@ -1416,9 +1417,10 @@ Q - Quit game
 F - toggle full screen
 """),
                 )
-                await self.run(level)
+                if not self.exit:
+                    await self.run(level)
         except KeyboardInterrupt:
-            self.quit_game()
+            self.exit_game()
 
 
 class Hero(pygame.sprite.Sprite):
