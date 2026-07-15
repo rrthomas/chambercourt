@@ -136,12 +136,7 @@ class Game[Tile: StrEnum]:
         self.hero_tile = hero_tile
         self.empty_tile = empty_tile
         self.default_tile = default_tile
-
         self.screen_size = (0, 0)
-        """The size of the game screen.
-
-        A pair giving the `(height, width)` of the screen.
-        """
 
         self.tile_width, self.tile_height = (16, 16)
         """The size of game tiles in pixels."""
@@ -176,6 +171,9 @@ class Game[Tile: StrEnum]:
 
         self.font_name = "acorn-mode-1.ttf"
         """The monospaced font to use for text."""
+
+        self.font_size = 8
+        """The font size in pixels."""
 
         self.font_scale = 1
         """The scale factor applied to the font.
@@ -294,7 +292,7 @@ Game instructions go here.
             # `self.game_window_max[0]` tiles plus
             # `self.screen_extra_x_chars` characters.
             while True:
-                font_pixels = 8 * scale * self.font_scale
+                font_pixels = self.font_size * scale * self.font_scale
                 game_window_width = (
                     info.current_w - self.screen_extra_x_chars * font_pixels
                 )
@@ -310,7 +308,7 @@ Game instructions go here.
             # `self.game_window_max[1]` tiles plus
             # `self.screen_extra_y_chars` characters.
             while True:
-                font_pixels = 8 * scale * self.font_scale
+                font_pixels = self.font_size * scale * self.font_scale
                 game_window_height = (
                     info.current_h - self.screen_extra_y_chars * font_pixels
                 )
@@ -324,7 +322,7 @@ Game instructions go here.
 
         # Set screen parameters according to the results
         scale = max(scale - 1, self.min_screen_scale)
-        font_pixels = 8 * scale * self.font_scale
+        font_pixels = self.font_size * scale * self.font_scale
         game_window_width = info.current_w - self.screen_extra_x_chars * font_pixels
         width_in_tiles = min(
             game_window_width // (self.tile_width * scale), self.game_window_max[0]
@@ -335,7 +333,7 @@ Game instructions go here.
         )
 
         self.screen_scale = scale
-        self.font_pixels = 8 * self.font_scale * self.screen_scale
+        self.font_pixels = self.font_size * self.font_scale * self.screen_scale
         self.window_size = (
             width_in_tiles * self.tile_width * self.screen_scale,
             height_in_tiles * self.tile_height * self.screen_scale,
@@ -1313,8 +1311,22 @@ Game instructions go here.
                 if not pygame.image.get_extended():
                     die(_("pygame does not have extended image format support"))
 
-                # Initialize pygame
-                pygame.init()
+                # Initialize pygame, setting screen size if not already set
+                if not pygame.display.get_init():
+                    pygame.init()
+                    pygame.display.set_mode(
+                        (
+                            self.game_window_max[0] * self.tile_width
+                            + self.screen_extra_x_chars * self.font_size,
+                            self.game_window_max[1] * self.tile_height
+                            + self.screen_extra_y_chars * self.font_size,
+                        ),
+                        pygame.SCALED | pygame.HIDDEN,
+                        vsync=1,
+                    )
+                    pygame.display.set_mode(
+                        pygame.display.get_window_size(), pygame.HIDDEN, vsync=1
+                    )
                 self.load_assets()
                 pygame.display.set_icon(self.app_icon)
                 pygame.mouse.set_visible(False)
