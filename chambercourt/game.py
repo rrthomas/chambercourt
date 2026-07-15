@@ -323,7 +323,7 @@ Game instructions go here.
                 scale += 1
 
         # Set screen parameters according to the results
-        scale = max(scale - 1, 1)
+        scale = max(scale - 1, self.min_screen_scale)
         font_pixels = 8 * scale * self.font_scale
         game_window_width = info.current_w - self.screen_extra_x_chars * font_pixels
         width_in_tiles = min(
