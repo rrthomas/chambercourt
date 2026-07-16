@@ -687,6 +687,7 @@ Game instructions go here.
         Args:
             filename (str): name of music file.
         """
+        pygame.mixer.music.stop()
         try:
             path = self.find_asset(filename)
             pygame.mixer.music.load(path)
