@@ -1,6 +1,6 @@
 [project]
 name = "ChamberCourt"
-version = "0.9.53"
+version = "0.9.54"
 description = "Simple 2D grid game framework based on Pygame-ce"
 license = "GPL-3.0-or-later"
 authors = [{name = "Reuben Thomas", email = "rrt@sc3d.org"}]
