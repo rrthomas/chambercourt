@@ -1058,6 +1058,7 @@ Game instructions go here.
 
     async def stop_play(self) -> None:
         """Do any game-specific tear-down when play is interrupted."""
+        pygame.mixer.music.stop()
 
     def update_map(self) -> None:
         """Update the map after a move.
