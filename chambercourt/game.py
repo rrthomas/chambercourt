@@ -14,6 +14,7 @@ import importlib
 import importlib.metadata
 import importlib.resources
 import locale
+import math
 import os
 import pickle
 import warnings
@@ -193,6 +194,9 @@ class Game[Tile: StrEnum]:
         self.default_volume = 0.8
         """Default volume of sound effects."""
 
+        self.music_volume = 0.7
+        """Volume of music track."""
+
         self.screen_scale: int
         self.clock = pygame.time.Clock()
         self.num_levels: int
@@ -222,6 +226,7 @@ class Game[Tile: StrEnum]:
         self.hero: Hero
         self.map_data: pyscroll.data.TiledMapData
         self._joysticks: dict[int, pygame.joystick.JoystickType] = {}
+        self.music_muted = False
         self.license_string = _("""Distributed under the GNU General Public License version 3, or (at
 your option) any later version. There is no warranty.""")
 
@@ -549,6 +554,7 @@ Game instructions go here.
                 f"tile size {self.map_data.tile_size} not expected value {(self.tile_width, self.tile_height)}"
             )
         self.clamp_window()
+        self.load_music()
 
         # Dict mapping tileset GIDs to map gids
         map_gids = self.map_data.tmx.gidmap
@@ -680,6 +686,25 @@ Game instructions go here.
             self.map_tiles[level] = copy.deepcopy(self.tmx_data[level].layers[0].data)
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data[level])
         self.set_map(copy.deepcopy(self.map_tiles[level]))
+
+    def set_music_volume(self) -> None:
+        """Set the music volume."""
+        if self.music_muted:
+            pygame.mixer.music.set_volume(0.0)
+        else:
+            pygame.mixer.music.set_volume(self.music_volume)
+
+    def load_music(self) -> None:
+        """Load music file for current level."""
+        try:
+            path = self.find_asset(
+                f"{self.level:0{math.floor(math.log10(self.num_levels) + 1)}}.ogg"
+            )
+            pygame.mixer.music.load(path)
+            self.set_music_volume()
+            pygame.mixer.music.play(-1)
+        except OSError:
+            pass  # ignore non-existent music
 
     def save_position(self) -> None:
         """Save the current position."""
@@ -1174,6 +1199,7 @@ Game instructions go here.
                     self.draw()
                     self.show_status()
                     self.show_screen()
+                pygame.mixer.music.fadeout(1000)
                 await self.stop_play()
             if self.finished():
                 await self.end_level()
@@ -1270,6 +1296,9 @@ Game instructions go here.
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_f:
                 pygame.display.toggle_fullscreen()
+            elif event.key == pygame.K_m:
+                self.music_muted = not self.music_muted
+                self.set_music_volume()
 
         if event.type in (
             pygame.MOUSEMOTION,
