@@ -344,22 +344,7 @@ Game instructions go here.
             width_in_tiles * self.tile_width * self.screen_scale,
             height_in_tiles * self.tile_height * self.screen_scale,
         )
-        if self.screen_size == (0, 0):
-            self.screen_size = (
-                max(
-                    self.window_size[0] + self.screen_extra_x_chars * self.font_pixels,
-                    self.screen_min_text_size[0] * self.font_pixels,
-                ),
-                max(
-                    self.window_size[1] + self.screen_extra_y_chars * self.font_pixels,
-                    self.screen_min_text_size[1] * self.font_pixels,
-                ),
-            )
-            self.surface = pygame.display.set_mode(
-                self.screen_size, pygame.RESIZABLE, vsync=1
-            )
-        else:
-            self.screen_size = (info.current_w, info.current_h)
+        self.screen_size = (info.current_w, info.current_h)
         self.screen_char_width = self.screen_size[0] // self.font_pixels
         self.reinit_screen()
         # Force ptext to cache the font
@@ -1378,18 +1363,21 @@ Game instructions go here.
                 # Initialize pygame, setting screen size if not already set
                 if not pygame.display.get_init():
                     pygame.init()
-                    pygame.display.set_mode(
+                    self.surface = pygame.display.set_mode(
                         (
-                            self.game_window_max[0] * self.tile_width
-                            + self.screen_extra_x_chars * self.font_size,
-                            self.game_window_max[1] * self.tile_height
-                            + self.screen_extra_y_chars * self.font_size,
+                            max(
+                                self.game_window_max[0] * self.tile_width
+                                + self.screen_extra_x_chars * self.font_size,
+                                self.screen_min_text_size[0] * self.font_size,
+                            ),
+                            max(
+                                self.game_window_max[1] * self.tile_height
+                                + self.screen_extra_y_chars * self.font_size,
+                                self.screen_min_text_size[1] * self.font_size,
+                            ),
                         ),
-                        pygame.SCALED | pygame.HIDDEN,
+                        pygame.SCALED | pygame.RESIZABLE,
                         vsync=1,
-                    )
-                    pygame.display.set_mode(
-                        pygame.display.get_window_size(), pygame.HIDDEN, vsync=1
                     )
                 self.load_assets()
                 pygame.display.set_icon(self.app_icon)
