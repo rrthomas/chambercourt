@@ -554,7 +554,9 @@ Game instructions go here.
                 f"tile size {self.map_data.tile_size} not expected value {(self.tile_width, self.tile_height)}"
             )
         self.clamp_window()
-        self.load_music()
+        self.load_music(
+            f"{self.level:0{math.floor(math.log10(self.num_levels) + 1)}}.ogg"
+        )
 
         # Dict mapping tileset GIDs to map gids
         map_gids = self.map_data.tmx.gidmap
@@ -694,12 +696,14 @@ Game instructions go here.
         else:
             pygame.mixer.music.set_volume(self.music_volume)
 
-    def load_music(self) -> None:
-        """Load music file for current level."""
+    def load_music(self, filename: str) -> None:
+        """Load music file for current level.
+
+        Args:
+            filename (str): name of music file.
+        """
         try:
-            path = self.find_asset(
-                f"{self.level:0{math.floor(math.log10(self.num_levels) + 1)}}.ogg"
-            )
+            path = self.find_asset(filename)
             pygame.mixer.music.load(path)
             self.set_music_volume()
             pygame.mixer.music.play(-1)
@@ -913,6 +917,7 @@ Game instructions go here.
         )
         play_y = start_level_y + 2
         play = False
+        self.load_music("title.ogg")
         while not self.exit and not play:
             self.reinit_screen()
             self.surface.blit(
