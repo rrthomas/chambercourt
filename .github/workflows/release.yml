@@ -64,11 +64,13 @@ jobs:
           cp ./chambercourt/levels/app-icon.png .
           cxfreeze bdist_appimage
           ./dist/ChamberCourt*.AppImage --help
+          mv dist/ChamberCourt*.AppImage dist/ChamberCourt-${{ runner.arch }}.AppImage
       - name: Build the executable (macOS)
         if: ${{ matrix.os == 'macos-14' }}
         run: |
           ./make-macos-icns ./chambercourt/levels/Hero.png app-icon.iconset
           cxfreeze bdist_dmg
+          mv build/chambercourt-*.dmg build/chambercourt-macOS.dmg
       - name: Build the executable (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
