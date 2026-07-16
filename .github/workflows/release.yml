@@ -64,7 +64,7 @@ jobs:
           pip install cx-Freeze
           png2svg -o app-icon.svg ./chambercourt/levels/app-icon.png
           cxfreeze bdist_appimage
-          ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }}.AppImage --help
+          ./dist/chambercourt*.AppImage --help
       - name: Build the executable (macOS)
         if: ${{ matrix.os == 'macos-14' }}
         run: |
@@ -91,7 +91,7 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           tag: ${{ github.ref }}
-          file: ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }}*
+          file: ./dist/chambercourt*-${{ runner.arch }}*
           file_glob: true
       - name: Upload the binary (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
