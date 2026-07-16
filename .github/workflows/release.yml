@@ -30,7 +30,7 @@ jobs:
       matrix:
         # Use oldest available macOS and Ubuntu for greatest compatibility
         # of resulting binary.
-        os: [ubuntu-24.04, macos-14, windows-latest, ubuntu-24.04-arm]
+        os: [ubuntu-22.04, macos-14, windows-latest, ubuntu-22.04-arm]
     runs-on: ${{ matrix.os }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -41,8 +41,8 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install non-Python build dependencies (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm' }}
-        run: sudo apt-get -y install gettext png2svg
+        if: ${{ matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm' }}
+        run: sudo apt-get -y install gettext
       - name: Install non-Python build dependencies (macOS)
         if: ${{ matrix.os == 'macos-14' }}
         run: |
@@ -59,10 +59,10 @@ jobs:
       - name: Build
         run: make dist
       - name: Build the executable (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm' }}
         run: |
           pip install cx-Freeze
-          png2svg -o app-icon.svg ./chambercourt/levels/app-icon.png
+          cp ./chambercourt/levels/app-icon.png .
           cxfreeze bdist_appimage
           ./dist/ChamberCourt*.AppImage --help
       - name: Build the executable (macOS)
@@ -86,7 +86,7 @@ jobs:
           cxfreeze bdist_msi
           mv dist/*.msi dist/chambercourt-win64.msi
       - name: Upload the binary (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm' }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ github.token }}
