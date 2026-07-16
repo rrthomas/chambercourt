@@ -62,7 +62,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-24.04' || matrix.os == 'ubuntu-24.04-arm' }}
         run: |
           pip install cx-Freeze
-          png2svg ./wincoll/levels/app-icon.png app-icon.svg
+          png2svg ./chambercourt/levels/app-icon.png app-icon.svg
           cxfreeze bdist_appimage
           ./dist/chambercourt-${{ runner.os }}-${{ runner.arch }}.AppImage --help
       - name: Build the executable (macOS)
