@@ -1323,9 +1323,7 @@ Game instructions go here.
         global _
 
         # Internationalise this module.
-        with importlib.resources.as_file(
-            importlib.resources.files("chambercourt")
-        ) as path:
+        with importlib.resources.as_file(importlib.resources.files()) as path:
             cat = gettext.translation("chambercourt", path / "locale", fallback=True)
             _ = cat.gettext
 
