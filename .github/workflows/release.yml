@@ -90,7 +90,7 @@ jobs:
         with:
           repo_token: ${{ github.token }}
           tag: ${{ github.ref }}
-          file: ./dist/chambercourt-*.dmg
+          file: ./build/chambercourt-*.dmg
           file_glob: true
       - name: Upload the binary (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
