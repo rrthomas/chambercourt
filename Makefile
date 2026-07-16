@@ -25,8 +25,10 @@ update-pofiles:
 
 build:
 	$(MAKE) update-pofiles
+	rm -rf $(PACKAGE).egg-info
 	python -m build
-	ln -sf ../$$(ls dist/$(PACKAGE)*.whl) ./browser/
+	rm ./browser/*.whl
+	ln -s ../$$(ls dist/$(PACKAGE)*.whl) ./browser/
 	echo '{"packages": ["'$$(basename dist/$(PACKAGE)*.whl)'"]}' > ./browser/conf.json
 
 dist:
