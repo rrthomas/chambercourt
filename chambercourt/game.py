@@ -1435,6 +1435,7 @@ joystick, mouse or tap the screen
 S/Button A - Save position
 L/Button B - Load position
 R/Button Y - Restart level
+M - Toggle music on/off
 Q - Quit game
 F - toggle full screen
 """),
