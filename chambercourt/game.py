@@ -576,6 +576,20 @@ Game instructions go here.
             (self.window_pixel_width, self.window_pixel_height)
         )
 
+        self.window_pos = (
+            max(
+                self.screen_extra_x_chars * self.font_pixels,
+                (self.surface.get_width() - self.window_pixel_width) // 2,
+            ),
+            (
+                self.surface.get_height()
+                - self.window_pixel_height
+                - self.screen_extra_y_chars * self.font_pixels
+            )
+            // 2
+            + self.screen_extra_y_chars * self.font_pixels,
+        )
+
     def start_level(self) -> None:
         """Start a level, saving the initial position."""
         self.restart_level()
