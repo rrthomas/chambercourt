@@ -1189,7 +1189,6 @@ Game instructions go here.
                     self.draw()
                     self.show_status()
                     self.show_screen()
-                pygame.mixer.music.fadeout(1000)
                 await self.stop_play()
             if self.finished():
                 await self.end_level()
