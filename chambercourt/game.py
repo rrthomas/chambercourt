@@ -167,7 +167,7 @@ class Game[Tile: StrEnum]:
         self.text_colour = Color(255, 255, 255)
         """The default text colour."""
 
-        self.default_background_colour = Color(32, 32, 32)
+        self.default_background_colour = Color(32, 48, 32)
         """The background colour of the screen."""
 
         self.font_name = "acorn-mode-1.ttf"
@@ -501,7 +501,9 @@ Game instructions go here.
     def init_renderer(self) -> None:
         """Set up the `pyscroll.BufferedRenderer` and its camera (group)."""
         self._map_layer = pyscroll.BufferedRenderer(
-            self.map_data, (self.window_pixel_width, self.window_pixel_height)
+            self.map_data,
+            (self.window_pixel_width, self.window_pixel_height),
+            alpha=True,
         )
         self._group = pyscroll.PyscrollGroup(map_layer=self._map_layer)
         self._group.add(self.hero)
@@ -573,7 +575,8 @@ Game instructions go here.
             self.window_size[1] // self.screen_scale,
         )
         self.game_surface = pygame.Surface(
-            (self.window_pixel_width, self.window_pixel_height)
+            (self.window_pixel_width, self.window_pixel_height),
+            pygame.SRCALPHA,
         )
 
         self.window_pos = (
