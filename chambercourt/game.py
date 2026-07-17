@@ -157,12 +157,12 @@ class Game[Tile: StrEnum]:
         self.screen_min_text_size = (40, 32)
         """Minimum number of characters across and down the screen."""
 
-        self.min_screen_scale = 1
-        """The minimum integer scale factor applied to the screen.
+        self.screen_scale: int
+        """The game screen is scaled by this factor before being blitted to the
+        display."""
 
-        The game screen is scaled by this factor before being blitted to the
-        display.
-        """
+        self.default_screen_scale = 1
+        """The default integer scale factor applied to the screen."""
 
         self.text_colour = Color(255, 255, 255)
         """The default text colour."""
@@ -197,7 +197,6 @@ class Game[Tile: StrEnum]:
         self.music_volume = 0.7
         """Volume of music track."""
 
-        self.screen_scale: int
         self.clock = pygame.time.Clock()
         self.num_levels: int
         self.levels_files: list[Path]
@@ -208,6 +207,7 @@ class Game[Tile: StrEnum]:
         self.window_pixel_height: int
         self.window_pos: tuple[int, int] = (0, 0)
         self.game_surface: pygame.Surface
+        self.surface: pygame.Surface
         self.quit = False
         self.exit = False
         self.level = 1
@@ -292,42 +292,42 @@ Game instructions go here.
             raise ValueError("cannot get display size")
 
         # Fill available area, smaller dimension first
-        scale = self.min_screen_scale
+        scale = self.default_screen_scale
         if info.current_w <= info.current_h:
             # Find biggest `screen_scale` that fits
             # `self.game_window_max[0]` tiles plus
             # `self.screen_extra_x_chars` characters.
-            while True:
+            while scale > 0:
                 font_pixels = self.font_size * scale * self.font_scale
                 game_window_width = (
                     info.current_w - self.screen_extra_x_chars * font_pixels
                 )
                 width_in_tiles = game_window_width // (self.tile_width * scale)
                 if (
-                    width_in_tiles < self.game_window_max[0]
-                    or info.current_w // font_pixels < self.screen_min_text_size[0]
+                    width_in_tiles >= self.game_window_max[0]
+                    and info.current_w // font_pixels >= self.screen_min_text_size[0]
                 ):
                     break
-                scale += 1
+                scale -= 1
         else:
             # Find biggest `screen_scale` that fits
             # `self.game_window_max[1]` tiles plus
             # `self.screen_extra_y_chars` characters.
-            while True:
+            while scale > 0:
                 font_pixels = self.font_size * scale * self.font_scale
                 game_window_height = (
                     info.current_h - self.screen_extra_y_chars * font_pixels
                 )
                 height_in_tiles = game_window_height // (self.tile_height * scale)
                 if (
-                    height_in_tiles < self.game_window_max[1]
-                    or info.current_h // font_pixels < self.screen_min_text_size[1]
+                    height_in_tiles >= self.game_window_max[1]
+                    or info.current_h // font_pixels >= self.screen_min_text_size[1]
                 ):
                     break
-                scale += 1
+                scale -= 1
 
         # Set screen parameters according to the results
-        scale = max(scale - 1, self.min_screen_scale)
+        scale = max(scale, 1)
         font_pixels = self.font_size * scale * self.font_scale
         game_window_width = info.current_w - self.screen_extra_x_chars * font_pixels
         width_in_tiles = min(
@@ -579,15 +579,18 @@ Game instructions go here.
         self.window_pos = (
             max(
                 self.screen_extra_x_chars * self.font_pixels,
-                (self.surface.get_width() - self.window_pixel_width) // 2,
+                (self.surface.get_width() - self.window_pixel_width * self.screen_scale)
+                // 2,
             ),
             (
-                self.surface.get_height()
-                - self.window_pixel_height
-                - self.screen_extra_y_chars * self.font_pixels
-            )
-            // 2
-            + self.screen_extra_y_chars * self.font_pixels,
+                (
+                    self.surface.get_height()
+                    - self.window_pixel_height * self.screen_scale
+                    - self.screen_extra_y_chars * self.font_pixels
+                )
+                // 2
+                + self.screen_extra_y_chars * self.font_pixels
+            ),
         )
 
     def start_level(self) -> None:
@@ -1376,7 +1379,11 @@ Game instructions go here.
                     die(_("pygame does not have extended image format support"))
 
                 # Initialize pygame, setting screen size if not already set
-                if not pygame.display.get_init():
+                if pygame.display.get_init():
+                    surface = pygame.display.get_surface()
+                    assert surface is not None
+                    self.surface = surface
+                else:
                     pygame.init()
                     self.surface = pygame.display.set_mode(
                         (
@@ -1384,12 +1391,14 @@ Game instructions go here.
                                 self.game_window_max[0] * self.tile_width
                                 + self.screen_extra_x_chars * self.font_size,
                                 self.screen_min_text_size[0] * self.font_size,
-                            ),
+                            )
+                            * self.default_screen_scale,
                             max(
                                 self.game_window_max[1] * self.tile_height
                                 + self.screen_extra_y_chars * self.font_size,
                                 self.screen_min_text_size[1] * self.font_size,
-                            ),
+                            )
+                            * self.default_screen_scale,
                         ),
                         pygame.SCALED | pygame.RESIZABLE,
                         vsync=1,
