@@ -553,6 +553,8 @@ Game instructions go here.
             properties = self.map_data.tmx.get_tile_properties_by_gid(gid)
             assert type(properties) is dict
             tile = self.tile_constructor(properties["type"])
+            if self._gids.get(tile) is not None:
+                raise ValueError(f"non-unique tile {tile}")
             self._gids[tile] = gid
 
         self.hero = Hero(self.hero_image)
