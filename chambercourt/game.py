@@ -528,8 +528,7 @@ Game instructions go here.
     def restart_level(self) -> None:
         """Restart the current level.
 
-        This method is used when starting a level, when loading a saved
-        position, when dying, and when restarting a level.
+        This method is used when starting or restarting a level.
 
         It loads the level, and sets the game window size to fit.
         """
@@ -541,9 +540,6 @@ Game instructions go here.
                 f"tile size {self.map_data.tile_size} not expected value {(self.tile_width, self.tile_height)}"
             )
         self.clamp_window()
-        self.load_music(
-            f"{self.level:0{math.floor(math.log10(self.num_levels) + 1)}}.ogg"
-        )
 
         # Dict mapping tileset GIDs to map gids
         map_gids = self.map_data.tmx.gidmap
@@ -1144,6 +1140,9 @@ Game instructions go here.
         while not self.quit and self.level <= self.num_levels:
             self.start_level()
             while not self.quit and not self.finished():
+                self.load_music(
+                    f"{self.level:0{math.floor(math.log10(self.num_levels) + 1)}}.ogg"
+                )
                 self.load_position()
                 frame = 0
                 moving = False
