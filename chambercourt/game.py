@@ -769,6 +769,7 @@ Game instructions go here.
 
     def draw(self) -> None:
         """Draw the current position."""
+        self.game_surface.fill(self.background_colour)
         self._group.center(self.hero.rect.center)
         self._group.draw(self.game_surface)
 
