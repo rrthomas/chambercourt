@@ -76,7 +76,18 @@
 
 
       def report(**fields):
-          window.RESULTS = json.dumps(fields)
+          """Publish the results for the test driver, and for a human reader."""
+          text = json.dumps(fields, indent=2, sort_keys=True)
+          print("RESULTS " + json.dumps(fields, sort_keys=True))
+          window.RESULTS = text
+          out = window.document.createElement("pre")
+          out.style.cssText = (
+              "position:fixed;left:0;top:0;right:0;bottom:0;margin:0;padding:8px;"
+              "background:#000;color:#0f0;font:13px monospace;"
+              "white-space:pre-wrap;z-index:10"
+          )
+          out.textContent = text
+          window.document.body.appendChild(out)
 
 
       def rate(times):
