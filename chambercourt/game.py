@@ -29,6 +29,7 @@ from typing import Any, cast
 import i18nparse  # type: ignore
 from platformdirs import user_data_dir
 
+from .frame_ticker import FrameTicker, make_ticker
 from .langdetect import language_code
 from .raw_version import RawVersionAction
 from .warnings_util import die, simple_warning
@@ -198,6 +199,7 @@ class Game[Tile: StrEnum]:
         """Volume of music track."""
 
         self.clock = pygame.time.Clock()
+        self.frame_ticker: FrameTicker = make_ticker(self.frames_per_second, self.clock)
         self.num_levels: int
         self.real_levels_path: Path
         self.levels_files: list[Path]
@@ -763,9 +765,11 @@ Game instructions go here.
             self.init_game()
 
     async def clock_tick(self) -> None:
-        """Let clock tick for a frame."""
-        self.clock.tick(self.frames_per_second)
-        await asyncio.sleep(0)
+        """Let the game loop tick for a frame.
+
+        The wait itself is platform-dependent; see `chambercourt.frame_ticker`.
+        """
+        await self.frame_ticker.tick()
 
     def draw(self) -> None:
         """Draw the current position."""
