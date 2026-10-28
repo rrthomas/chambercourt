@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>ChamberCourt frame-timing harness</title>
+    <link
+      rel="stylesheet"
+      href="https://pyscript.net/releases/2026.7.2/core.css"
+    />
+    <script
+      type="module"
+      src="https://pyscript.net/releases/2026.7.2/core.js"
+    ></script>
+  </head>
+  <body style="margin: 0; background: #000080">
+    <canvas id="canvas"></canvas>
+    <script type="py-game" config='{"packages": ["__WHEEL__"]}'>
+      """Measure how the game loop is paced in a real browser.
+
+      The test driver reads `window.PHASE` and `window.RESULTS` from here, and
+      samples CPU metrics from the DevTools protocol as each phase boundary
+      goes by, so that the three phases can be attributed separately:
+
+      1. the frame ticker on its own, as shipped;
+      2. the frame ticker on its own, spinning until the frame is due, i.e.
+         what the browser used to do (the control);
+      3. the real game loop.
+      """
+
+      import asyncio
+      import json
+      import sys
+      import time
+
+      import pygame
+      from pyscript import window
+
+      from chambercourt.chambercourt_game import ChambercourtGame
+      from chambercourt.frame_ticker import TimerTicker, make_ticker
+
+
+      TICKER_SECONDS = 3.0
+      BOOT_SECONDS = 5.0
+      GAME_SECONDS = 5.0
+
+
+      class RecordingTicker:
+          """Wraps a ticker, recording when each tick happened, and for how long."""
+
+          def __init__(self, inner):
+              self.inner = inner
+              self.times = []
+              self.durations = []
+
+          async def tick(self):
+              start = time.monotonic()
+              await self.inner.tick()
+              end = time.monotonic()
+              self.times.append(end)
+              self.durations.append(end - start)
+              return 1 / 60
+
+
+      class BusyTicker:
+          """The old browser behaviour: spin until the frame is due."""
+
+          def __init__(self, fps=60):
+              self.period = 1.0 / fps
+
+          async def tick(self):
+              deadline = time.monotonic() + self.period
+              while time.monotonic() < deadline:
+                  pass
+              await asyncio.sleep(0)
+              return self.period
+
+
+      def report(**fields):
+          window.RESULTS = json.dumps(fields)
+
+
+      def rate(times):
+          """Ticks per second, from a list of tick timestamps."""
+          if len(times) < 2:
+              return 0.0
+          return (len(times) - 1) / (times[-1] - times[0])
+
+
+      def mean(xs):
+          return sum(xs) / len(xs) if xs else 0.0
+
+
+      async def drive(ticker, seconds):
+          """Await `ticker` alone, for `seconds`; return the recording."""
+          recording = RecordingTicker(ticker)
+          end = time.monotonic() + seconds
+          while time.monotonic() < end:
+              await recording.tick()
+          return recording
+
+
+      async def run():
+          window.PHASE = 0
+          window.RESULTS = ""
+          try:
+              pygame.init()
+              pygame.display.set_mode((640, 480), 0, vsync=1)
+
+              game = ChambercourtGame()
+              ticker_name = type(game.frame_ticker).__name__
+              is_timer = isinstance(make_ticker(1), TimerTicker)
+
+              # Phase 1: the ticker on its own, as shipped.
+              window.PHASE = 1
+              alone = await drive(make_ticker(60), TICKER_SECONDS)
+
+              # Phase 2: the ticker on its own, spinning (the control).
+              window.PHASE = 2
+              spinning = await drive(BusyTicker(), TICKER_SECONDS)
+
+              # Phase 3: the real game loop.
+              window.PHASE = 3
+              recording = RecordingTicker(game.frame_ticker)
+              game.frame_ticker = recording
+              task = asyncio.create_task(game.main([]))
+              await asyncio.sleep(BOOT_SECONDS)
+              recording.times.clear()
+              recording.durations.clear()
+              await asyncio.sleep(GAME_SECONDS)
+              task.cancel()
+
+              gaps = [b - a for a, b in zip(recording.times, recording.times[1:])]
+              draw = [
+                  gap - spent
+                  for gap, spent in zip(
+                      gaps, recording.durations[1:],
+                  )
+              ]
+              window.PHASE = 4
+              report(
+                  platform=sys.platform,
+                  ticker=ticker_name,
+                  is_timer_ticker=is_timer,
+                  alone_rate=rate(alone.times),
+                  spinning_rate=rate(spinning.times),
+                  game_rate=rate(recording.times),
+                  game_tick_ms=mean(recording.durations) * 1000,
+                  game_draw_ms=mean(draw) * 1000,
+                  game_max_gap_ms=max(gaps, default=0.0) * 1000,
+                  game_ticks=len(recording.times),
+              )
+          except BaseException as exc:
+              window.PHASE = 4
+              report(error=f"{type(exc).__name__}: {exc}")
+
+
+      await run()
+    </script>
+  </body>
+</html>
