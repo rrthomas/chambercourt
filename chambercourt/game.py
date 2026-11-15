@@ -161,6 +161,9 @@ class Game[Tile: StrEnum]:
         """The game screen is scaled by this factor before being blitted to the
         display."""
 
+        self.game_scale: int
+        """The scale of the game window; can be larger than `screen_scale`."""
+
         self.default_screen_scale = 1
         """The default integer scale factor applied to the screen."""
 
@@ -340,10 +343,11 @@ Game instructions go here.
         )
 
         self.screen_scale = scale
+        self.game_scale = self.screen_scale
         self.font_pixels = self.font_size * self.font_scale * self.screen_scale
         self.window_size = (
-            width_in_tiles * self.tile_width * self.screen_scale,
-            height_in_tiles * self.tile_height * self.screen_scale,
+            width_in_tiles * self.tile_width * self.game_scale,
+            height_in_tiles * self.tile_height * self.game_scale,
         )
         self.screen_size = (info.current_w, info.current_h)
         self.screen_char_width = self.screen_size[0] // self.font_pixels
@@ -402,23 +406,28 @@ Game instructions go here.
             max(self.background_colour.b - 10, self.default_background_colour.b),
         )
 
-    def scale_surface(self, surface: pygame.Surface) -> pygame.Surface:
-        """Scales the given surface by `self.screen_scale`.
+    def scale_surface(self, surface: pygame.Surface, scale: int = 0) -> pygame.Surface:
+        """Scales the given surface by `scale`.
 
         Args:
             surface (pygame.Surface): surface to scale
+            scale (int): scale factor (defaults to `self.screen_scale`)
 
         Returns:
             pygame.Surface: a new surface, that is `surface` scaled by
-            `self.screen_scale`.
+            `self.game_scale`.
         """
-        scaled_width = surface.get_width() * self.screen_scale
-        scaled_height = surface.get_height() * self.screen_scale
+        if scale == 0:
+            scale = self.screen_scale
+        scaled_width = surface.get_width() * scale
+        scaled_height = surface.get_height() * scale
         return pygame.transform.scale(surface, (scaled_width, scaled_height))
 
     def show_screen(self) -> None:
         """Show the current frame, and clear the rendering buffer."""
-        self.surface.blit(self.scale_surface(self.game_surface), self.window_pos)
+        self.surface.blit(
+            self.scale_surface(self.game_surface, self.game_scale), self.window_pos
+        )
         pygame.display.flip()
         self.clear_screen()
         self.fade_background()
@@ -592,16 +601,20 @@ Game instructions go here.
     def clamp_window(self) -> None:
         """Clamp the window size to the level size.
 
-        If the level is smaller than the window, reduce the window size.
+        If the level is smaller than the window, increase `self.game_scale`
+        and/or reduce the window size.
         """
-        self.window_pixel_width = min(
-            self.level_width * self.tile_width,
-            self.window_size[0] // self.screen_scale,
+        window_tiles_width = min(self.game_window_max[0], self.level_width)
+        tile_width = self.window_size[0] // window_tiles_width
+        window_tiles_height = min(self.game_window_max[1], self.level_height)
+        tile_height = self.window_size[1] // window_tiles_height
+        self.game_scale = min(
+            tile_width // self.tile_width,
+            tile_height // self.tile_height,
         )
-        self.window_pixel_height = min(
-            self.level_height * self.tile_height,
-            self.window_size[1] // self.screen_scale,
-        )
+
+        self.window_pixel_width = self.tile_width * window_tiles_width
+        self.window_pixel_height = self.tile_height * window_tiles_height
         self.game_surface = pygame.Surface(
             (self.window_pixel_width, self.window_pixel_height),
             pygame.SRCALPHA,
@@ -610,13 +623,13 @@ Game instructions go here.
         self.window_pos = (
             max(
                 self.screen_extra_x_chars * self.font_pixels,
-                (self.surface.get_width() - self.window_pixel_width * self.screen_scale)
+                (self.surface.get_width() - self.window_pixel_width * self.game_scale)
                 // 2,
             ),
             (
                 (
                     self.surface.get_height()
-                    - self.window_pixel_height * self.screen_scale
+                    - self.window_pixel_height * self.game_scale
                     - self.screen_extra_y_chars * self.font_pixels
                 )
                 // 2
@@ -935,9 +948,9 @@ Game instructions go here.
         """
         origin = self._map_layer.get_center_offset()
         return Vector2(
-            ((pos[0] - self.window_pos[0]) // self.screen_scale - origin[0])
+            ((pos[0] - self.window_pos[0]) // self.game_scale - origin[0])
             // self.tile_width,
-            ((pos[1] - self.window_pos[1]) // self.screen_scale - origin[1])
+            ((pos[1] - self.window_pos[1]) // self.game_scale - origin[1])
             // self.tile_height,
         )
 
