@@ -21,7 +21,7 @@ jobs:
           python-version: "3.13"
 
       # Install all dependencies (including pdoc)
-      - run: pip install -e . pdoc pygame i18nparse importlib-resources platformdirs pyscroll pytmx
+      - run: pip install -e . pdoc pygame-ce i18nparse importlib-resources platformdirs pyscroll pytmx
       # Build your documentation into docs/.
       - run: pdoc --docformat google -o docs/ chambercourt
 

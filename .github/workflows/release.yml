@@ -17,7 +17,7 @@ jobs:
       - name: Install non-Python build dependencies
         run: sudo apt-get -y install gettext
       - name: Install Python dependencies
-        run: pip install tox build pygame i18nparse platformdirs pyscroll pytmx toml-cli
+        run: pip install tox build pygame-ce i18nparse platformdirs pyscroll pytmx toml-cli
       - name: Build
         run: make dist
       - name: Make the release
@@ -55,7 +55,7 @@ jobs:
           Add-Content $env:GITHUB_PATH "C:\nuget\Gettext.Tools.0.22.4\tools\bin";
           choco install wget
       - name: Install Python dependencies
-        run: pip install tox build setuptools pygame i18nparse platformdirs pyscroll pytmx toml-cli
+        run: pip install tox build setuptools pygame-ce i18nparse platformdirs pyscroll pytmx toml-cli
       - name: Build
         run: make dist
       - name: Build the executable (Ubuntu)
